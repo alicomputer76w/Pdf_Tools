@@ -504,7 +504,7 @@ class PerformanceManager {
         resources.forEach(resource => {
             if (!this.getFromCache(`prefetch-${resource}`)) {
                 this.prefetchResource(resource);
-                this.cache(`prefetch-${resource}`, true, { ttl: 300000 }); // 5 minutes
+                this.setCache(`prefetch-${resource}`, true, { ttl: 300000 }); // 5 minutes
             }
         });
     }

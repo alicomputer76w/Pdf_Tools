@@ -87,8 +87,27 @@ class ToolManager {
     }
 
     initializeTools() {
-        // Register available tools
-        this.registerTool('pdf-merger', new PDFMergerTool());
+        // Register available tools with correct IDs matching HTML data-tool attributes
+        this.registerTool('merger', new PDFMergerTool());
+        this.registerTool('splitter', new PDFMergerTool()); // Using same class for now
+        this.registerTool('pdf-to-word', new PDFMergerTool());
+        this.registerTool('pdf-to-image', new PDFMergerTool());
+        this.registerTool('image-to-pdf', new PDFMergerTool());
+        this.registerTool('compressor', new PDFMergerTool());
+        this.registerTool('password-protector', new PDFMergerTool());
+        this.registerTool('watermark', new PDFMergerTool());
+        this.registerTool('rotator', new PDFMergerTool());
+        this.registerTool('metadata', new PDFMergerTool());
+        this.registerTool('form-filler', new PDFMergerTool());
+        this.registerTool('signature', new PDFMergerTool());
+        this.registerTool('text-extractor', new PDFMergerTool());
+        this.registerTool('page-numbering', new PDFMergerTool());
+        this.registerTool('bookmark', new PDFMergerTool());
+        this.registerTool('resizer', new PDFMergerTool());
+        this.registerTool('color-converter', new PDFMergerTool());
+        this.registerTool('ocr', new PDFMergerTool());
+        this.registerTool('annotation', new PDFMergerTool());
+        this.registerTool('optimizer', new PDFMergerTool());
         
         console.log('Tools initialized:', Array.from(this.tools.keys()));
     }
@@ -115,6 +134,7 @@ class ToolManager {
         const tool = this.getTool(toolId);
         if (!tool) {
             console.error(`Tool "${toolId}" not found`);
+            alert(`Tool "${toolId}" not found!`);
             return;
         }
 
@@ -122,12 +142,15 @@ class ToolManager {
             const toolInterface = tool.createInterface();
             console.log(`Opening tool: ${tool.name}`);
             
+            // Show a notification that the tool is being opened
+            alert(`${tool.name} tool selected! This feature is under development.`);
+            
             // In a real implementation, this would open a modal
-            // For now, just log success
             console.log('Tool interface created successfully');
             
         } catch (error) {
             console.error(`Failed to open tool: ${error.message}`);
+            alert(`Failed to open ${tool.name}: ${error.message}`);
         }
     }
 }
@@ -138,5 +161,7 @@ window.ToolManager = ToolManager;
 // Initialize tool manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.toolManager = new ToolManager();
+    window.toolManager.setupEventListeners();
     console.log('Clean ToolManager initialized successfully');
+    console.log('Event listeners set up for tool buttons');
 });

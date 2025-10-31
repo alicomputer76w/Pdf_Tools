@@ -1,0 +1,25 @@
+{
+  "name": "PDF Tools Suite",
+  "short_name": "PDF Tools",
+  "description": "Complete PDF processing toolkit with merge, split, convert and optimization features",
+  "version": "1.0.0",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en-US"
+}
