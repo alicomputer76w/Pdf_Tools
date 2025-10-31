@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Console - PDF Tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .warning {
+            color: #ffaa00;
+        }
+        .info {
+            color: #4488ff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Tools Debug Console</h1>
+    <p>This page will capture and display all JavaScript errors with detailed information.</p>
+    
+    <button onclick="loadScripts()">Load All Scripts</button>
+    <button onclick="clearConsole()">Clear Console</button>
+    
+    <div id="console" class="console-output">Console output will appear here...\n</div>
+
+    <script>
+        const consoleDiv = document.getElementById('console');
+        
+        // Override console methods to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            consoleDiv.innerHTML += `<span class="${className}">[${timestamp}] ${type.toUpperCase()}: ${message}</span>\n`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            addToConsole(args.join(' '), 'info');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            addToConsole(args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            addToConsole(args.join(' '), 'warning');
+            originalWarn.apply(console, args);
+        };
+        
+        // Capture all errors
+        window.addEventListener('error', function(e) {
+            const errorMsg = `${e.message} at ${e.filename}:${e.lineno}:${e.colno}`;
+            addToConsole(errorMsg, 'error');
+        });
+        
+        // Capture unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(e) {
+            addToConsole(`Unhandled Promise Rejection: ${e.reason}`, 'error');
+        });
+        
+        function clearConsole() {
+            consoleDiv.innerHTML = 'Console cleared...\n';
+        }
+        
+        function loadScripts() {
+            addToConsole('Starting to load scripts...', 'info');
+            
+            const scripts = [
+                // External libraries
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+                
+                // Internal scripts
+                'js/utils.js',
+                'js/error-handler.js',
+                'js/accessibility.js',
+                'js/drag-drop.js',
+                'js/performance.js',
+                'js/components.js',
+                'js/tools.js',
+                'js/app.js'
+            ];
+            
+            let loadedCount = 0;
+            
+            function loadNextScript() {
+                if (loadedCount >= scripts.length) {
+                    addToConsole('All scripts loaded successfully!', 'info');
+                    return;
+                }
+                
+                const scriptSrc = scripts[loadedCount];
+                addToConsole(`Loading script ${loadedCount + 1}/${scripts.length}: ${scriptSrc}`, 'info');
+                
+                const script = document.createElement('script');
+                script.src = scriptSrc;
+                
+                script.onload = function() {
+                    addToConsole(`✓ Successfully loaded: ${scriptSrc}`, 'info');
+                    loadedCount++;
+                    setTimeout(loadNextScript, 100); // Small delay to catch any immediate errors
+                };
+                
+                script.onerror = function() {
+                    addToConsole(`✗ Failed to load: ${scriptSrc}`, 'error');
+                    loadedCount++;
+                    setTimeout(loadNextScript, 100);
+                };
+                
+                document.head.appendChild(script);
+            }
+            
+            loadNextScript();
+        }
+        
+        addToConsole('Debug console initialized. Click "Load All Scripts" to begin testing.', 'info');
+    </script>
+</body>
+</html>

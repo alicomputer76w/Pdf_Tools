@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tools Minimal</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>Test Tools Minimal</h1>
+    <div id="log"></div>
+
+    <script>
+        function log(message, isError = false, isSuccess = false) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            console.log(message);
+        }
+
+        // Override console.error to catch syntax errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), true);
+            originalError.apply(console, args);
+        };
+
+        // Catch unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`❌ Script Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, true);
+        });
+
+        log('Testing minimal tools.js content...');
+    </script>
+
+    <!-- Test just the BaseTool class -->
+    <script>
+        try {
+            // Just the BaseTool class from tools.js
+            class BaseTool {
+                constructor(name, description) {
+                    this.name = name;
+                    this.description = description;
+                }
+
+                async execute(files, options = {}) {
+                    throw new Error('Execute method must be implemented by subclass');
+                }
+
+                createInterface() {
+                    throw new Error('CreateInterface method must be implemented by subclass');
+                }
+
+                validate(files, options = {}) {
+                    return { valid: true, errors: [] };
+                }
+            }
+            
+            log('✅ BaseTool class loaded successfully', false, true);
+        } catch (e) {
+            log('❌ BaseTool class failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test PDFMergerTool class -->
+    <script>
+        try {
+            class PDFMergerTool extends BaseTool {
+                constructor() {
+                    super('PDF Merger', 'Combine multiple PDFs into one document');
+                }
+
+                createInterface() {
+                    return `
+                        <div class="tool-interface">
+                            <div id="merger-upload"></div>
+                            <div class="tool-options">
+                                <div class="option-group">
+                                    <label class="option-label">Output filename:</label>
+                                    <input type="text" class="option-input" id="merger-filename" value="merged-document.pdf">
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
+                                <button class="btn btn-primary" id="merger-process">
+                                    <i class="material-icons">merge_type</i>
+                                    <span>Merge PDFs</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            log('✅ PDFMergerTool class loaded successfully', false, true);
+        } catch (e) {
+            log('❌ PDFMergerTool class failed: ' + e.message, true);
+        }
+    </script>
+
+    <script>
+        log('Minimal tools test complete');
+    </script>
+</body>
+</html>

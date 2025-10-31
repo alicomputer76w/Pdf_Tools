@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Syntax Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .file-test {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .loading { background: #fff3cd; border-color: #ffeaa7; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        #console-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Detailed JavaScript Syntax Test</h1>
+        <p>Testing each JavaScript file individually to identify syntax errors.</p>
+        
+        <div class="test-buttons">
+            <button onclick="testAllFiles()">Test All Files</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="test-results"></div>
+        <div id="console-output"></div>
+    </div>
+
+    <script>
+        const jsFiles = [
+            'js/utils.js',
+            'js/error-handler.js',
+            'js/accessibility.js',
+            'js/drag-drop.js',
+            'js/performance.js',
+            'js/components.js',
+            'js/tools.js',
+            'js/app.js'
+        ];
+
+        let testResults = {};
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            logToConsole(`❌ Global Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`);
+            logToConsole(`Stack: ${e.error ? e.error.stack : 'No stack trace'}`);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            logToConsole(`❌ Unhandled Promise Rejection: ${e.reason}`);
+        });
+
+        function logToConsole(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('console-output').textContent = '';
+            testResults = {};
+        }
+
+        function updateFileStatus(filename, status, message = '') {
+            const resultsDiv = document.getElementById('test-results');
+            const fileId = filename.replace(/[^a-zA-Z0-9]/g, '_');
+            
+            let fileDiv = document.getElementById(fileId);
+            if (!fileDiv) {
+                fileDiv = document.createElement('div');
+                fileDiv.id = fileId;
+                fileDiv.className = 'file-test';
+                resultsDiv.appendChild(fileDiv);
+            }
+            
+            fileDiv.className = `file-test ${status}`;
+            fileDiv.innerHTML = `
+                <strong>${filename}</strong>: 
+                <span class="status">${status.toUpperCase()}</span>
+                ${message ? `<br><small>${message}</small>` : ''}
+            `;
+            
+            testResults[filename] = { status, message };
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src + '?v=' + Date.now(); // Cache busting
+                
+                script.onload = () => {
+                    logToConsole(`✅ Successfully loaded: ${src}`);
+                    resolve();
+                };
+                
+                script.onerror = (e) => {
+                    logToConsole(`❌ Failed to load: ${src}`);
+                    reject(new Error(`Failed to load ${src}`));
+                };
+                
+                // Add error listener before appending
+                const originalOnError = window.onerror;
+                window.onerror = function(message, source, lineno, colno, error) {
+                    if (source && source.includes(src)) {
+                        logToConsole(`❌ Syntax error in ${src}: ${message} at line ${lineno}`);
+                        reject(new Error(`Syntax error: ${message}`));
+                        return true;
+                    }
+                    if (originalOnError) {
+                        return originalOnError.apply(this, arguments);
+                    }
+                };
+                
+                document.head.appendChild(script);
+                
+                // Restore original error handler after a delay
+                setTimeout(() => {
+                    window.onerror = originalOnError;
+                }, 1000);
+            });
+        }
+
+        async function testFile(filename) {
+            logToConsole(`🔍 Testing: ${filename}`);
+            updateFileStatus(filename, 'loading', 'Loading...');
+            
+            try {
+                await loadScript(filename);
+                updateFileStatus(filename, 'success', 'Loaded successfully');
+                logToConsole(`✅ ${filename} - OK`);
+            } catch (error) {
+                updateFileStatus(filename, 'error', error.message);
+                logToConsole(`❌ ${filename} - ERROR: ${error.message}`);
+            }
+        }
+
+        async function testAllFiles() {
+            clearResults();
+            logToConsole('🚀 Starting comprehensive JavaScript file test...');
+            
+            for (const file of jsFiles) {
+                await testFile(file);
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            logToConsole('📊 Test Summary:');
+            Object.entries(testResults).forEach(([file, result]) => {
+                logToConsole(`  ${file}: ${result.status.toUpperCase()}`);
+            });
+        }
+
+        // Auto-start test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('🔧 Page loaded, ready for testing');
+            setTimeout(testAllFiles, 1000);
+        });
+    </script>
+</body>
+</html>

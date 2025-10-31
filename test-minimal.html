@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Tools Test</title>
+</head>
+<body>
+    <h1>Testing Minimal Tools.js</h1>
+    <div id="output"></div>
+
+    <script>
+        console.log('Starting minimal tools.js test...');
+        
+        // Add error handler for script loading
+        window.addEventListener('error', function(e) {
+            console.error('Script error:', e.error);
+            console.error('File:', e.filename);
+            console.error('Line:', e.lineno);
+            console.error('Column:', e.colno);
+            document.getElementById('output').innerHTML += '<p style="color: red;">Error: ' + e.error + '</p>';
+        });
+    </script>
+    
+    <!-- Load minimal tools.js -->
+    <script src="js/tools-minimal.js" onerror="console.error('Failed to load tools-minimal.js')"></script>
+    
+    <script>
+        console.log('After loading tools-minimal.js...');
+        console.log('ToolManager type:', typeof ToolManager);
+        
+        const output = document.getElementById('output');
+        
+        if (typeof ToolManager !== 'undefined') {
+            output.innerHTML += '<p style="color: green;">✅ ToolManager loaded successfully!</p>';
+            try {
+                const toolManager = new ToolManager();
+                output.innerHTML += '<p style="color: green;">✅ ToolManager instantiated successfully!</p>';
+                output.innerHTML += '<p>Tools count: ' + toolManager.tools.size + '</p>';
+            } catch (error) {
+                output.innerHTML += '<p style="color: red;">❌ Error instantiating ToolManager: ' + error.message + '</p>';
+                console.error('ToolManager instantiation error:', error);
+            }
+        } else {
+            output.innerHTML += '<p style="color: red;">❌ ToolManager not loaded!</p>';
+        }
+    </script>
+</body>
+</html>

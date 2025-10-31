@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Index Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Minimal Index Test</h1>
+        <p>Testing the core JavaScript loading sequence to identify syntax errors.</p>
+        <div id="status"></div>
+    </div>
+
+    <!-- Load scripts in the same order as index.html -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="js/utils.js?v=2"></script>
+    <script src="js/error-handler.js?v=2"></script>
+    <script src="js/accessibility.js?v=2"></script>
+    <script src="js/drag-drop.js?v=2"></script>
+    <script src="js/performance.js?v=2"></script>
+    <script src="js/components.js?v=2"></script>
+    <script src="js/tools.js?v=2"></script>
+    <script>
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error(`❌ Global Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`);
+            document.getElementById('status').innerHTML += `<div style="color: red;">Error: ${e.message} at line ${e.lineno}</div>`;
+        });
+
+        console.log('=== Script Loading Debug ===');
+        console.log('PDF-lib loaded:', typeof PDFLib !== 'undefined');
+        console.log('PDF.js loaded:', typeof pdfjsLib !== 'undefined');
+        console.log('Utils loaded:', typeof Utils !== 'undefined');
+        console.log('ErrorHandler loaded:', typeof ErrorHandler !== 'undefined');
+        console.log('AccessibilityManager loaded:', typeof AccessibilityManager !== 'undefined');
+        console.log('DragDropManager loaded:', typeof DragDropManager !== 'undefined');
+        console.log('PerformanceMonitor loaded:', typeof PerformanceMonitor !== 'undefined');
+        console.log('Components loaded:', typeof ModalManager !== 'undefined');
+        console.log('ToolManager loaded:', typeof ToolManager !== 'undefined');
+        
+        if (typeof ToolManager === 'undefined') {
+            console.error('❌ ToolManager not loaded properly');
+            console.error('Available global objects:', Object.keys(window).filter(key => key.includes('Tool') || key.includes('Manager')));
+        } else {
+            console.log('✅ ToolManager loaded successfully');
+        }
+        
+        document.getElementById('status').innerHTML = '<div style="color: green;">All scripts loaded successfully!</div>';
+    </script>
+    <script src="js/app.js?v=2"></script>
+</body>
+</html>

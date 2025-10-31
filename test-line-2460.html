@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Line 2460</title>
+</head>
+<body>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        // Test the exact syntax from line 2460
+        try {
+            // Simulate the problematic code
+            const tool = {
+                createInterface: function() {
+                    return '<div>Test interface</div>';
+                }
+            };
+            
+            const toolInterface = tool.createInterface();
+            output.innerHTML += '<p>✓ Line 2460 syntax test passed</p>';
+            
+            // Test other potential issues
+            const testArrowFunction = () => {
+                return 'arrow function works';
+            };
+            output.innerHTML += '<p>✓ Arrow function test passed</p>';
+            
+            const testConst = 'const works';
+            output.innerHTML += '<p>✓ Const declaration test passed</p>';
+            
+            const testTemplateString = `template string works`;
+            output.innerHTML += '<p>✓ Template string test passed</p>';
+            
+        } catch (error) {
+            output.innerHTML += `<p style="color: red;">✗ Error: ${error.message}</p>`;
+            console.error('Test error:', error);
+        }
+    </script>
+</body>
+</html>

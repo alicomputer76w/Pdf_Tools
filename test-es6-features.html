@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ES6 Features</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>Test ES6 Features</h1>
+    <div id="log"></div>
+
+    <script>
+        function log(message, isError = false, isSuccess = false) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            console.log(message);
+        }
+
+        // Override console.error to catch syntax errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), true);
+            originalError.apply(console, args);
+        };
+
+        // Catch unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`❌ Script Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, true);
+        });
+
+        log('Testing ES6 features...');
+    </script>
+
+    <!-- Test 1: Simple class -->
+    <script>
+        try {
+            class TestClass {
+                constructor() {
+                    this.name = 'test';
+                }
+            }
+            log('✅ Basic class syntax works', false, true);
+        } catch (e) {
+            log('❌ Basic class syntax failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test 2: Class with extends -->
+    <script>
+        try {
+            class BaseClass {
+                constructor() {
+                    this.base = true;
+                }
+            }
+            
+            class ExtendedClass extends BaseClass {
+                constructor() {
+                    super();
+                    this.extended = true;
+                }
+            }
+            log('✅ Class inheritance works', false, true);
+        } catch (e) {
+            log('❌ Class inheritance failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test 3: const and let -->
+    <script>
+        try {
+            const testConst = 'test';
+            let testLet = 'test';
+            log('✅ const and let work', false, true);
+        } catch (e) {
+            log('❌ const and let failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test 4: Arrow functions -->
+    <script>
+        try {
+            const arrowFunc = () => 'test';
+            log('✅ Arrow functions work', false, true);
+        } catch (e) {
+            log('❌ Arrow functions failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test 5: Template literals -->
+    <script>
+        try {
+            const name = 'test';
+            const template = `Hello ${name}`;
+            log('✅ Template literals work', false, true);
+        } catch (e) {
+            log('❌ Template literals failed: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Test 6: Async/await -->
+    <script>
+        try {
+            async function testAsync() {
+                return 'test';
+            }
+            log('✅ Async functions work', false, true);
+        } catch (e) {
+            log('❌ Async functions failed: ' + e.message, true);
+        }
+    </script>
+
+    <script>
+        log('ES6 feature testing complete');
+    </script>
+</body>
+</html>

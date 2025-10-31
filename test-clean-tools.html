@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Clean Tools</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+        .warning { border-left-color: #ffc107; background: #fffbf0; color: #856404; }
+        button { margin: 10px 5px; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Test Clean Tools</h1>
+    <div id="log"></div>
+    
+    <div>
+        <button onclick="testClasses()">Test Classes</button>
+        <button onclick="testToolManager()">Test ToolManager</button>
+        <button data-tool="pdf-merger">Test PDF Merger Tool</button>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log ' + type;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            console.log(message);
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            log(`❌ Global Error: ${e.message}<br>File: ${e.filename}<br>Line: ${e.lineno}<br>Column: ${e.colno}`, 'error');
+            return false;
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            log(`❌ Unhandled Promise Rejection: ${e.reason}`, 'error');
+        });
+
+        // Override console methods
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && args[0].includes && (args[0].includes('Tools initialized') || args[0].includes('ToolManager initialized'))) {
+                log('✅ ' + args.join(' '), 'success');
+            }
+            originalLog.apply(console, args);
+        };
+
+        function testClasses() {
+            try {
+                if (typeof BaseTool !== 'undefined') {
+                    log('✅ BaseTool class is available', 'success');
+                } else {
+                    log('❌ BaseTool class is not available', 'error');
+                }
+                
+                if (typeof PDFMergerTool !== 'undefined') {
+                    log('✅ PDFMergerTool class is available', 'success');
+                } else {
+                    log('❌ PDFMergerTool class is not available', 'error');
+                }
+                
+                if (typeof ToolManager !== 'undefined') {
+                    log('✅ ToolManager class is available', 'success');
+                } else {
+                    log('❌ ToolManager class is not available', 'error');
+                }
+            } catch (e) {
+                log('❌ Error testing classes: ' + e.message, 'error');
+            }
+        }
+
+        function testToolManager() {
+            try {
+                if (window.toolManager) {
+                    log('✅ Global toolManager instance is available', 'success');
+                    log(`✅ Tools registered: ${Array.from(window.toolManager.tools.keys()).join(', ')}`, 'success');
+                } else {
+                    log('❌ Global toolManager instance is not available', 'error');
+                }
+            } catch (e) {
+                log('❌ Error testing ToolManager: ' + e.message, 'error');
+            }
+        }
+
+        log('🚀 Clean tools test initialized', 'info');
+    </script>
+
+    <!-- Load the clean tools script -->
+    <script src="js/tools-clean.js"></script>
+</body>
+</html>

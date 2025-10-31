@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Order Test</title>
+</head>
+<body>
+    <h1>Script Loading Test</h1>
+    <div id="log"></div>
+
+    <script>
+        function log(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const p = document.createElement('p');
+            p.style.color = isError ? 'red' : 'green';
+            p.textContent = message;
+            logDiv.appendChild(p);
+            console.log(message);
+        }
+        
+        window.addEventListener('error', (e) => {
+            log(`❌ ERROR: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, true);
+        });
+        
+        log('✅ Base script loaded');
+    </script>
+
+    <!-- Load scripts in exact same order as index.html -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script>log('✅ PDF-lib loaded');</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>log('✅ PDF.js loaded');</script>
+
+    <script src="js/utils.js"></script>
+    <script>log('✅ Utils.js loaded');</script>
+
+    <script src="js/error-handler.js"></script>
+    <script>log('✅ Error-handler.js loaded');</script>
+
+    <script src="js/accessibility.js"></script>
+    <script>log('✅ Accessibility.js loaded');</script>
+
+    <script src="js/drag-drop.js"></script>
+    <script>log('✅ Drag-drop.js loaded');</script>
+
+    <script src="js/performance.js"></script>
+    <script>log('✅ Performance.js loaded');</script>
+
+    <script src="js/components.js"></script>
+    <script>log('✅ Components.js loaded');</script>
+
+    <script src="js/tools-rebuild.js"></script>
+    <script>log('✅ Tools-rebuild.js loaded');</script>
+
+    <script>
+        log('✅ All scripts loaded successfully!');
+        log('ToolManager available: ' + (typeof ToolManager !== 'undefined'));
+    </script>
+</body>
+</html>

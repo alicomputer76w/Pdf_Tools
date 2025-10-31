@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Tools Suite - Complete PDF Solution</title>
+    <meta name="description" content="Comprehensive PDF tools suite with 20 essential features for all your PDF needs">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1976d2">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading PDF Tools Suite...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="material-icons">picture_as_pdf</i>
+                    <h1>PDF Tools Suite</h1>
+                </div>
+                <nav class="nav">
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                        <i class="material-icons">brightness_6</i>
+                    </button>
+                    <button id="help-btn" class="help-btn" aria-label="Help">
+                        <i class="material-icons">help_outline</i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h2>Complete PDF Solution</h2>
+                <p>20 powerful tools to handle all your PDF needs - merge, split, convert, compress, and more!</p>
+            </section>
+
+            <!-- Search and Filter -->
+            <section class="search-section">
+                <div class="search-container">
+                    <i class="material-icons">search</i>
+                    <input type="text" id="tool-search" placeholder="Search tools..." aria-label="Search tools">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-category="all">All Tools</button>
+                    <button class="filter-tab" data-category="convert">Convert</button>
+                    <button class="filter-tab" data-category="edit">Edit</button>
+                    <button class="filter-tab" data-category="secure">Secure</button>
+                    <button class="filter-tab" data-category="optimize">Optimize</button>
+                </div>
+            </section>
+
+            <!-- Tools Grid -->
+            <section class="tools-grid" id="tools-grid">
+                <!-- PDF Merger -->
+                <div class="tool-card" data-tool="merger" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">merge_type</i>
+                    </div>
+                    <h3>PDF Merger</h3>
+                    <p>Combine multiple PDFs into one document</p>
+                    <button class="tool-btn" data-tool="merger">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- PDF Splitter -->
+                <div class="tool-card" data-tool="splitter" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">content_cut</i>
+                    </div>
+                    <h3>PDF Splitter</h3>
+                    <p>Extract specific pages from PDF documents</p>
+                    <button class="tool-btn" data-tool="splitter">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- PDF to Word -->
+                <div class="tool-card" data-tool="pdf-to-word" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">description</i>
+                    </div>
+                    <h3>PDF to Word</h3>
+                    <p>Convert PDF documents to editable Word files</p>
+                    <button class="tool-btn" data-tool="pdf-to-word">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- PDF to Image -->
+                <div class="tool-card" data-tool="pdf-to-image" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">image</i>
+                    </div>
+                    <h3>PDF to Image</h3>
+                    <p>Convert PDF pages to high-quality images</p>
+                    <button class="tool-btn" data-tool="pdf-to-image">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Image to PDF -->
+                <div class="tool-card" data-tool="image-to-pdf" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">photo_library</i>
+                    </div>
+                    <h3>Image to PDF</h3>
+                    <p>Convert images to PDF documents</p>
+                    <button class="tool-btn" data-tool="image-to-pdf">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- PDF Compressor -->
+                <div class="tool-card" data-tool="compressor" data-category="optimize">
+                    <div class="tool-icon">
+                        <i class="material-icons">compress</i>
+                    </div>
+                    <h3>PDF Compressor</h3>
+                    <p>Reduce PDF file size while maintaining quality</p>
+                    <button class="tool-btn" data-tool="compressor">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Password Protector -->
+                <div class="tool-card" data-tool="password-protector" data-category="secure">
+                    <div class="tool-icon">
+                        <i class="material-icons">lock</i>
+                    </div>
+                    <h3>Password Protector</h3>
+                    <p>Add password protection to PDF documents</p>
+                    <button class="tool-btn" data-tool="password-protector">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Watermark Adder -->
+                <div class="tool-card" data-tool="watermark" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">branding_watermark</i>
+                    </div>
+                    <h3>Watermark Adder</h3>
+                    <p>Add text or image watermarks to PDFs</p>
+                    <button class="tool-btn" data-tool="watermark">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Page Rotator -->
+                <div class="tool-card" data-tool="rotator" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">rotate_right</i>
+                    </div>
+                    <h3>Page Rotator</h3>
+                    <p>Rotate PDF pages to correct orientation</p>
+                    <button class="tool-btn" data-tool="rotator">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Metadata Editor -->
+                <div class="tool-card" data-tool="metadata" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">info</i>
+                    </div>
+                    <h3>Metadata Editor</h3>
+                    <p>Edit PDF properties and metadata</p>
+                    <button class="tool-btn" data-tool="metadata">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Form Filler -->
+                <div class="tool-card" data-tool="form-filler" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">edit_note</i>
+                    </div>
+                    <h3>Form Filler</h3>
+                    <p>Fill and edit PDF forms easily</p>
+                    <button class="tool-btn" data-tool="form-filler">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Digital Signature -->
+                <div class="tool-card" data-tool="signature" data-category="secure">
+                    <div class="tool-icon">
+                        <i class="material-icons">draw</i>
+                    </div>
+                    <h3>Digital Signature</h3>
+                    <p>Add digital signatures to PDF documents</p>
+                    <button class="tool-btn" data-tool="signature">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Text Extractor -->
+                <div class="tool-card" data-tool="text-extractor" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">text_fields</i>
+                    </div>
+                    <h3>Text Extractor</h3>
+                    <p>Extract text content from PDF documents</p>
+                    <button class="tool-btn" data-tool="text-extractor">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Page Numbering -->
+                <div class="tool-card" data-tool="page-numbering" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">format_list_numbered</i>
+                    </div>
+                    <h3>Page Numbering</h3>
+                    <p>Add page numbers to PDF documents</p>
+                    <button class="tool-btn" data-tool="page-numbering">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Bookmark Manager -->
+                <div class="tool-card" data-tool="bookmark" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">bookmark</i>
+                    </div>
+                    <h3>Bookmark Manager</h3>
+                    <p>Add and manage PDF bookmarks</p>
+                    <button class="tool-btn" data-tool="bookmark">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Page Resizer -->
+                <div class="tool-card" data-tool="resizer" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">aspect_ratio</i>
+                    </div>
+                    <h3>Page Resizer</h3>
+                    <p>Resize PDF pages to different dimensions</p>
+                    <button class="tool-btn" data-tool="resizer">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Color Mode Converter -->
+                <div class="tool-card" data-tool="color-converter" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">palette</i>
+                    </div>
+                    <h3>Color Mode Converter</h3>
+                    <p>Convert between color modes (RGB, CMYK, Grayscale)</p>
+                    <button class="tool-btn" data-tool="color-converter">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- OCR Tool -->
+                <div class="tool-card" data-tool="ocr" data-category="convert">
+                    <div class="tool-icon">
+                        <i class="material-icons">scanner</i>
+                    </div>
+                    <h3>OCR Tool</h3>
+                    <p>Extract text from scanned PDF documents</p>
+                    <button class="tool-btn" data-tool="ocr">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Annotation Tool -->
+                <div class="tool-card" data-tool="annotation" data-category="edit">
+                    <div class="tool-icon">
+                        <i class="material-icons">note_add</i>
+                    </div>
+                    <h3>Annotation Tool</h3>
+                    <p>Add comments and annotations to PDFs</p>
+                    <button class="tool-btn" data-tool="annotation">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- Quality Optimizer -->
+                <div class="tool-card" data-tool="optimizer" data-category="optimize">
+                    <div class="tool-icon">
+                        <i class="material-icons">tune</i>
+                    </div>
+                    <h3>Quality Optimizer</h3>
+                    <p>Optimize PDF quality and performance</p>
+                    <button class="tool-btn" data-tool="optimizer">
+                        <span>Select Tool</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Tool Modal -->
+    <div id="tool-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Tool Name</h2>
+                <button class="modal-close" aria-label="Close modal">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Tool-specific content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notification-container" class="notification-container" aria-live="polite"></div>
+
+    <!-- Progress Modal -->
+    <div id="progress-modal" class="modal progress-modal" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="progress-content">
+                <div class="progress-icon">
+                    <div class="progress-spinner"></div>
+                </div>
+                <h3 id="progress-title">Processing...</h3>
+                <p id="progress-message">Please wait while we process your file.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-percentage" id="progress-percentage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" role="dialog" aria-labelledby="help-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="help-title">Help & Documentation</h2>
+                <button class="modal-close" aria-label="Close help">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h3>Keyboard Shortcuts</h3>
+                    <ul class="shortcuts-list">
+                        <li><kbd>Ctrl</kbd> + <kbd>/</kbd> - Search tools</li>
+                        <li><kbd>Esc</kbd> - Close modal</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>D</kbd> - Toggle dark mode</li>
+                        <li><kbd>F1</kbd> - Show help</li>
+                    </ul>
+                    <h3>Supported File Types</h3>
+                    <p>PDF files up to 50MB, Images (JPG, PNG, GIF, BMP, TIFF)</p>
+                    <h3>Privacy & Security</h3>
+                    <p>All processing is done locally in your browser. Your files never leave your device.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="js/error-handler.js?v=1"></script>
+    <script src="js/utils.js?v=1"></script>
+    <script src="js/accessibility.js?v=1"></script>
+    <script src="js/drag-drop.js?v=1"></script>
+    <script src="js/performance.js?v=1"></script>
+    <script src="js/components.js?v=1"></script>
+    <script src="js/tools.js?v=3"></script>
+    <script>
+        console.log('=== Script Loading Debug ===');
+        console.log('PDF-lib loaded:', typeof PDFLib !== 'undefined');
+        console.log('PDF.js loaded:', typeof pdfjsLib !== 'undefined');
+        console.log('Utils loaded:', typeof Utils !== 'undefined');
+        console.log('ErrorHandler loaded:', typeof ErrorHandler !== 'undefined');
+        console.log('AccessibilityManager loaded:', typeof AccessibilityManager !== 'undefined');
+        console.log('DragDropManager loaded:', typeof DragDropManager !== 'undefined');
+        console.log('PerformanceMonitor loaded:', typeof PerformanceMonitor !== 'undefined');
+        console.log('Components loaded:', typeof ModalManager !== 'undefined');
+        console.log('ToolManager loaded:', typeof ToolManager !== 'undefined');
+        
+        if (typeof ToolManager === 'undefined') {
+            console.error('❌ ToolManager not loaded properly');
+            console.error('Available global objects:', Object.keys(window).filter(key => key.includes('Tool') || key.includes('Manager')));
+        } else {
+            console.log('✅ ToolManager loaded successfully');
+        }
+    </script>
+    <script src="js/app.js?v=1"></script>
+</body>
+</html>

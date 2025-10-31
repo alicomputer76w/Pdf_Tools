@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tools.js Only</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>Test Tools.js Only</h1>
+    <div id="log"></div>
+
+    <script>
+        function log(message, isError = false, isSuccess = false) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            console.log(message);
+        }
+
+        // Override console.error to catch syntax errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), true);
+            originalError.apply(console, args);
+        };
+
+        // Catch unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`❌ Script Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, true);
+        });
+
+        log('Starting test...');
+        
+        // Mock dependencies that tools.js expects
+        window.PDFLib = { 
+            PDFDocument: { 
+                create: () => ({}), 
+                load: () => ({}) 
+            },
+            degrees: (deg) => deg 
+        };
+        window.pdfjsLib = { getDocument: () => ({}) };
+        window.PDFUtils = { loadPDF: () => ({}), savePDF: () => new Uint8Array() };
+        window.DownloadUtils = { downloadPDF: () => {} };
+        window.modalManager = { 
+            showProgress: () => {}, 
+            updateProgress: () => {}, 
+            hideProgress: () => {},
+            closeModal: () => {}
+        };
+        window.notificationManager = { 
+            success: () => {}, 
+            error: () => {},
+            info: () => {}
+        };
+        window.ImageUtils = { canvasToBlob: () => new Blob() };
+
+        log('Mock dependencies created');
+    </script>
+    
+    <!-- Load tools.js -->
+    <script src="js/tools.js"></script>
+    
+    <script>
+        log('Tools.js loaded');
+        log('ToolManager available: ' + (typeof ToolManager !== 'undefined'), false, typeof ToolManager !== 'undefined');
+        log('BaseTool available: ' + (typeof BaseTool !== 'undefined'), false, typeof BaseTool !== 'undefined');
+        
+        if (typeof ToolManager !== 'undefined') {
+            log('✅ Tools.js loaded successfully!', false, true);
+        } else {
+            log('❌ Tools.js failed to load properly', true);
+        }
+    </script>
+</body>
+</html>

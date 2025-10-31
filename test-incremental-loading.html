@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incremental Script Loading Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Incremental Script Loading Test</h1>
+    <div id="log"></div>
+    
+    <button onclick="loadScript(0)">Load PDF.js</button>
+    <button onclick="loadScript(1)">Load PDF-lib</button>
+    <button onclick="loadScript(2)">Load Utils</button>
+    <button onclick="loadScript(3)">Load Error Handler</button>
+    <button onclick="loadScript(4)">Load Accessibility</button>
+    <button onclick="loadScript(5)">Load Drag Drop</button>
+    <button onclick="loadScript(6)">Load Performance</button>
+    <button onclick="loadScript(7)">Load Components</button>
+    <button onclick="loadScript(8)">Load Tools</button>
+    <button onclick="loadScript(9)">Load App</button>
+    <button onclick="clearLog()">Clear Log</button>
+
+    <script>
+        const scripts = [
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
+            'js/utils.js',
+            'js/error-handler.js',
+            'js/accessibility.js',
+            'js/drag-drop.js',
+            'js/performance.js',
+            'js/components.js',
+            'js/tools.js',
+            'js/app.js'
+        ];
+
+        const scriptNames = [
+            'PDF.js',
+            'PDF-lib',
+            'Utils',
+            'Error Handler',
+            'Accessibility',
+            'Drag Drop',
+            'Performance',
+            'Components',
+            'Tools',
+            'App'
+        ];
+
+        let loadedScripts = [];
+
+        function log(message, isError = false, isSuccess = false) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Override console.error to catch syntax errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), true);
+            originalError.apply(console, args);
+        };
+
+        // Catch unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`❌ Script Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, true);
+        });
+
+        function loadScript(index) {
+            if (index >= scripts.length) {
+                log('All scripts loaded!', false, true);
+                return;
+            }
+
+            const scriptUrl = scripts[index];
+            const scriptName = scriptNames[index];
+
+            log(`Loading ${scriptName}...`);
+
+            const script = document.createElement('script');
+            script.src = scriptUrl;
+            
+            script.onload = function() {
+                loadedScripts.push(scriptName);
+                log(`✅ ${scriptName} loaded successfully`, false, true);
+                
+                // Check what globals are available
+                if (scriptName === 'PDF.js') {
+                    log(`PDF.js globals: pdfjsLib=${typeof pdfjsLib}`);
+                } else if (scriptName === 'PDF-lib') {
+                    log(`PDF-lib globals: PDFLib=${typeof PDFLib}`);
+                } else if (scriptName === 'Utils') {
+                    log(`Utils globals: Utils=${typeof Utils}`);
+                } else if (scriptName === 'Tools') {
+                    log(`Tools globals: ToolManager=${typeof ToolManager}, BaseTool=${typeof BaseTool}`);
+                }
+            };
+            
+            script.onerror = function() {
+                log(`❌ Failed to load ${scriptName}`, true);
+            };
+
+            document.head.appendChild(script);
+        }
+
+        log('Ready to load scripts incrementally. Click buttons to load one by one.');
+    </script>
+</body>
+</html>

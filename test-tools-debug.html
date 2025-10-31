@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tools Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #007cba; background: #f0f8ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; color: #dc3545; }
+        .success { border-left-color: #28a745; background: #f8fff8; color: #28a745; }
+        .warning { border-left-color: #ffc107; background: #fffbf0; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Test Tools Debug</h1>
+    <div id="log"></div>
+    <button onclick="loadToolsScript()">Load tools.js</button>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log ' + type;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            console.log(message);
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            log(`❌ Global Error: ${e.message}<br>File: ${e.filename}<br>Line: ${e.lineno}<br>Column: ${e.colno}<br>Stack: ${e.error ? e.error.stack : 'N/A'}`, 'error');
+            return false; // Don't prevent default handling
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            log(`❌ Unhandled Promise Rejection: ${e.reason}`, 'error');
+        });
+
+        // Override console methods
+        const originalError = console.error;
+        console.error = function(...args) {
+            log('❌ Console Error: ' + args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            log('⚠️ Console Warning: ' + args.join(' '), 'warning');
+            originalWarn.apply(console, args);
+        };
+
+        function loadToolsScript() {
+            log('🔄 Attempting to load tools.js...', 'info');
+            
+            const script = document.createElement('script');
+            script.src = 'js/tools.js';
+            script.type = 'text/javascript';
+            
+            script.onload = function() {
+                log('✅ tools.js loaded successfully!', 'success');
+                
+                // Test if classes are available
+                try {
+                    if (typeof BaseTool !== 'undefined') {
+                        log('✅ BaseTool class is available', 'success');
+                    } else {
+                        log('❌ BaseTool class is not available', 'error');
+                    }
+                    
+                    if (typeof ToolManager !== 'undefined') {
+                        log('✅ ToolManager class is available', 'success');
+                    } else {
+                        log('❌ ToolManager class is not available', 'error');
+                    }
+                } catch (e) {
+                    log('❌ Error testing classes: ' + e.message, 'error');
+                }
+            };
+            
+            script.onerror = function(e) {
+                log('❌ Failed to load tools.js: ' + e.message, 'error');
+            };
+            
+            // Add script to head
+            document.head.appendChild(script);
+        }
+
+        log('🚀 Debug test initialized. Click the button to load tools.js', 'info');
+    </script>
+</body>
+</html>

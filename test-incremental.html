@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incremental Script Test</title>
+</head>
+<body>
+    <h1>Incremental Script Loading Test</h1>
+    <div id="log"></div>
+    <button onclick="loadNext()">Load Next Script</button>
+    <button onclick="loadAll()">Load All</button>
+
+    <script>
+        let currentScript = 0;
+        const scripts = [
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+            'js/utils.js',
+            'js/error-handler.js',
+            'js/accessibility.js',
+            'js/drag-drop.js',
+            'js/performance.js',
+            'js/components.js',
+            'js/tools-rebuild.js'
+        ];
+
+        function log(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const p = document.createElement('p');
+            p.style.color = isError ? 'red' : 'green';
+            p.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logDiv.appendChild(p);
+            console.log(message);
+        }
+
+        window.addEventListener('error', (e) => {
+            log(`❌ ERROR in ${scripts[currentScript-1] || 'unknown'}: ${e.message} at line ${e.lineno}`, true);
+            return false; // Don't prevent default
+        });
+
+        function loadNext() {
+            if (currentScript >= scripts.length) {
+                log('✅ All scripts loaded!');
+                return;
+            }
+
+            const scriptSrc = scripts[currentScript];
+            log(`Loading script ${currentScript + 1}/${scripts.length}: ${scriptSrc}`);
+            
+            const script = document.createElement('script');
+            script.src = scriptSrc;
+            
+            script.onload = () => {
+                log(`✅ Successfully loaded: ${scriptSrc}`);
+                currentScript++;
+            };
+            
+            script.onerror = () => {
+                log(`❌ Failed to load: ${scriptSrc}`, true);
+                currentScript++;
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        function loadAll() {
+            const interval = setInterval(() => {
+                if (currentScript >= scripts.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                loadNext();
+            }, 1000);
+        }
+
+        log('✅ Test page loaded. Click "Load Next Script" to test incrementally.');
+    </script>
+</body>
+</html>

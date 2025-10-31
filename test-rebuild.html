@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rebuilt Tools</title>
+</head>
+<body>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        // Test loading the rebuilt tools.js
+        const script = document.createElement('script');
+        script.src = 'js/tools-rebuild.js';
+        
+        script.onload = function() {
+            output.innerHTML += '<p style="color: green;">✓ tools-rebuild.js loaded successfully</p>';
+            
+            // Test ToolManager
+            if (typeof ToolManager !== 'undefined') {
+                output.innerHTML += '<p style="color: green;">✓ ToolManager class is defined</p>';
+                
+                try {
+                    const manager = new ToolManager();
+                    output.innerHTML += '<p style="color: green;">✓ ToolManager instantiated successfully</p>';
+                    
+                    // Test tool registration
+            const mergerTool = manager.getTool('pdf-merger');
+            const splitterTool = manager.getTool('pdf-splitter');
+            const wordTool = manager.getTool('pdf-to-word');
+            
+            if (mergerTool && splitterTool && wordTool) {
+                output.innerHTML += '<p style="color: green;">✓ All tools registered successfully</p>';
+            } else {
+                output.innerHTML += '<p style="color: orange;">⚠ Some tools not registered</p>';
+                output.innerHTML += `<p style="color: orange;">PDF Merger: ${mergerTool ? 'Found' : 'Not found'}</p>`;
+                output.innerHTML += `<p style="color: orange;">PDF Splitter: ${splitterTool ? 'Found' : 'Not found'}</p>`;
+                output.innerHTML += `<p style="color: orange;">PDF to Word: ${wordTool ? 'Found' : 'Not found'}</p>`;
+            }
+                    
+                } catch (error) {
+                    output.innerHTML += `<p style="color: red;">✗ ToolManager instantiation failed: ${error.message}</p>`;
+                }
+            } else {
+                output.innerHTML += '<p style="color: red;">✗ ToolManager class not defined</p>';
+            }
+        };
+        
+        script.onerror = function(error) {
+            output.innerHTML += `<p style="color: red;">✗ Failed to load tools-rebuild.js: ${error.message || 'Script loading error'}</p>`;
+            console.error('Script loading error:', error);
+        };
+        
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

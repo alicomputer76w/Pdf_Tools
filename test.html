@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>JS Test</title>
+</head>
+<body>
+    <div id="test">Testing JavaScript loading...</div>
+    <script>
+        console.log('Basic script loaded');
+        document.getElementById('test').textContent = 'JavaScript is working!';
+    </script>
+    <script src="js/utils.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/tools.js"></script>
+    <script>
+        console.log('ToolManager available:', typeof ToolManager);
+        if (typeof ToolManager !== 'undefined') {
+            console.log('Creating ToolManager instance...');
+            const tm = new ToolManager();
+            console.log('ToolManager created successfully');
+        }
+    </script>
+</body>
+</html>
