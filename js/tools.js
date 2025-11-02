@@ -106,10 +106,13 @@ class PDFMergerTool extends BaseTool {
 
                 const filename = (nameInput?.value || 'merged-document.pdf').trim();
 
-                // Show progress modal
-                await modalManager.showProgress('Merging PDFs...', 'Please wait while we merge your files.');
+                // Show progress modal (do not await)
+                modalManager.showProgress('Merging PDFs...', 'Please wait while we merge your files.');
+                modalManager.updateProgress(5, 'Preparing files');
+
                 // Execute merge
                 await this.execute(files, { filename });
+
                 // Mark complete
                 modalManager.updateProgress(100, 'Completed');
                 window.notificationManager?.show('PDFs merged successfully!', 'success');
