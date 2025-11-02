@@ -138,6 +138,7 @@ p {
     top: 0;
     z-index: 100;
     transition: var(--transition);
+    border-bottom: 1px solid var(--divider-color);
 }
 
 .header-content {
@@ -179,26 +180,45 @@ p {
 }
 
 .top-nav-links .nav-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0.5rem 0.75rem;
-    border-radius: 20px;
     text-decoration: none;
     color: var(--text-secondary);
     transition: var(--transition-fast);
+    font-weight: 500;
 }
 
 .top-nav-links .nav-link:hover {
-    background: var(--surface-color);
     color: var(--primary-color);
+}
+
+.top-nav-links .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: -8px;
+    height: 2px;
+    background: transparent;
+    transition: var(--transition-fast);
+    border-radius: 2px;
+}
+
+.top-nav-links .nav-link:hover::after {
+    background: var(--divider-color);
 }
 
 .top-nav-links .nav-link[aria-current="page"],
 .top-nav-links .nav-link.active {
-    background: rgba(25, 118, 210, 0.1);
     color: var(--primary-dark);
-    font-weight: 500;
+}
+
+.top-nav-links .nav-link[aria-current="page"]::after,
+.top-nav-links .nav-link.active::after {
+    background: var(--primary-color);
 }
 
 .theme-toggle,
@@ -299,6 +319,18 @@ p {
     margin-bottom: 12px;
 }
 
+.feedback-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 720px) {
+    .feedback-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 .feedback-form label {
     color: var(--text-primary);
     font-weight: 500;
@@ -320,6 +352,10 @@ p {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.08);
+}
+
+.form-actions {
+    margin-top: 12px;
 }
 
 .feedback-image {
