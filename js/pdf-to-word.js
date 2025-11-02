@@ -39,10 +39,10 @@ class PDFToWordTool extends BaseTool {
         if (isReady()) return true;
 
         const sources = [
-            // Prefer local copy if available to avoid CDN blockers
-            'js/vendor/docx.js',
+            // On GitHub Pages, CDN is usually allowed; try CDN first, then local fallback
+            'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js',
             'https://unpkg.com/docx@8.5.0/build/docx.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js'
+            'js/vendor/docx.js'
         ];
 
         for (const src of sources) {

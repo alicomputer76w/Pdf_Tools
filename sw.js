@@ -3,21 +3,22 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = 'pdf-tools-suite-v1.1.0';
-const STATIC_CACHE = 'pdf-tools-static-v1.1.0';
+const CACHE_NAME = 'pdf-tools-suite-v1.2.0';
+const STATIC_CACHE = 'pdf-tools-static-v1.2.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
-    '/',
-    '/index.html',
-    '/about.html',
-    '/policy.html',
-    '/css/styles.css',
-    '/css/components.css',
-    '/js/app.js',
-    '/js/utils.js',
-    '/js/components.js',
-    '/js/tools.js?v=14',
+    './',
+    './index.html',
+    './about.html',
+    './policy.html',
+    './css/styles.css',
+    './css/components.css',
+    './js/app.js?v=3',
+    './js/utils.js?v=4',
+    './js/components.js?v=3',
+    './js/tools.js?v=14',
+    './js/pdf-to-word.js?v=1',
     'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
@@ -80,41 +81,38 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                // Return cached version if available
-                if (cachedResponse) {
-                    return cachedResponse;
+    const request = event.request;
+    const isHTML = request.destination === 'document' || (request.headers.get('accept') || '').includes('text/html');
+
+    event.respondWith((async () => {
+        if (isHTML) {
+            // Network-first for HTML to ensure updates are visible
+            try {
+                const networkResponse = await fetch(request);
+                const cache = await caches.open(CACHE_NAME);
+                cache.put(request, networkResponse.clone());
+                return networkResponse;
+            } catch (err) {
+                const cached = await caches.match('./index.html');
+                return cached || new Response('Offline', { status: 503, statusText: 'Offline' });
+            }
+        } else {
+            // Cache-first for static assets
+            const cached = await caches.match(request);
+            if (cached) return cached;
+            try {
+                const networkResponse = await fetch(request);
+                // Only cache successful same-origin responses
+                if (networkResponse && networkResponse.status === 200) {
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, networkResponse.clone());
                 }
-
-                // Otherwise, fetch from network
-                return fetch(event.request)
-                    .then((response) => {
-                        // Don't cache non-successful responses
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-
-                        // Clone the response
-                        const responseToCache = response.clone();
-
-                        // Cache the response for future use
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
-
-                        return response;
-                    })
-                    .catch(() => {
-                        // If network fails and no cache, return offline page
-                        if (event.request.destination === 'document') {
-                            return caches.match('/index.html');
-                        }
-                    });
-            })
-    );
+                return networkResponse;
+            } catch (err) {
+                return new Response('Resource unavailable', { status: 503 });
+            }
+        }
+    })());
 });
 
 // Handle messages from the main thread
