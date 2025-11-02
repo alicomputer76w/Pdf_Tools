@@ -34,6 +34,24 @@ class AccessibilityManager {
     }
 
     setupKeyboardNavigation() {
+        // Capture Space key in input fields to prevent unintended activations
+        document.addEventListener('keydown', (e) => {
+            const t = e.target;
+            const isTypingField = (
+                t instanceof HTMLElement && (
+                    t.tagName === 'INPUT' ||
+                    t.tagName === 'TEXTAREA' ||
+                    t.tagName === 'SELECT' ||
+                    t.isContentEditable
+                )
+            );
+            if (isTypingField && (e.key === ' ')) {
+                // Stop propagation early so other handlers (drop zones/cards) don't react
+                e.stopPropagation();
+                return;
+            }
+        }, true);
+
         document.addEventListener('keydown', (e) => {
             this.handleGlobalKeydown(e);
         });

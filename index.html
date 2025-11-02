@@ -97,7 +97,7 @@
                         <i class="material-icons">description</i>
                     </div>
                     <h3>PDF to Word</h3>
-                    <p>Convert PDF documents to editable Word files</p>
+                    <p>Convert PDF documents to editable Word (DOCX) files — English & Urdu</p>
                     <button class="tool-btn" data-tool="pdf-to-word">
                         <span>Select Tool</span>
                         <i class="material-icons">arrow_forward</i>
@@ -411,6 +411,8 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- DOCX library for Word export (local copy to avoid CDN blockers) -->
+    <script src="js/vendor/docx.js"></script>
     <script src="js/error-handler.js?v=2"></script>
     <script src="js/utils.js?v=4"></script>
     <script src="js/accessibility.js?v=2"></script>
@@ -418,6 +420,7 @@
     <script src="js/performance.js?v=3"></script>
     <script src="js/components.js?v=3"></script>
     <script src="js/tools.js?v=14"></script>
+    <script src="js/pdf-to-word.js?v=1"></script>
     <script>
         console.log('=== Script Loading Debug ===');
         console.log('PDF-lib loaded:', typeof PDFLib !== 'undefined');

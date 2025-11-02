@@ -442,9 +442,11 @@ class FileUploadComponent {
             this.fileInput.click();
         });
 
-        // Keyboard support
+        // Keyboard support: only trigger when the upload area itself has focus
         this.uploadArea.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
+                // Avoid activating when typing inside any descendant input
+                if (e.target !== e.currentTarget) return;
                 e.preventDefault();
                 this.fileInput.click();
             }

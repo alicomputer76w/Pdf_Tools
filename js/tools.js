@@ -830,7 +830,7 @@ class ToolManager {
         this.expectedToolClasses = {
             'merger': 'PDFMergerTool',
             'splitter': 'PDFSplitterTool',
-            'pdf-to-word': 'TextExtractorTool',
+            'pdf-to-word': 'PDFToWordTool',
             'pdf-to-image': 'PDFToImageTool',
             'image-to-pdf': 'ImageToPDFTool',
             'compressor': 'CompressorTool',
@@ -857,7 +857,7 @@ class ToolManager {
         // Register available tools with correct IDs matching HTML data-tool attributes
         this.registerTool('merger', new PDFMergerTool());
         this.registerTool('splitter', new PDFSplitterTool());
-        this.registerTool('pdf-to-word', new TextExtractorTool()); // temporary: provide text extraction as word-like output
+        this.registerTool('pdf-to-word', new PDFToWordTool());
         this.registerTool('pdf-to-image', new PDFToImageTool());
         this.registerTool('image-to-pdf', new ImageToPDFTool());
         this.registerTool('compressor', new CompressorTool());
@@ -912,7 +912,7 @@ class ToolManager {
             switch (toolId) {
                 case 'merger': tool = new PDFMergerTool(); break;
                 case 'splitter': tool = new PDFSplitterTool(); break;
-                case 'pdf-to-word': tool = new TextExtractorTool(); break;
+                case 'pdf-to-word': tool = new PDFToWordTool(); break;
                 case 'pdf-to-image': tool = new PDFToImageTool(); break;
                 case 'image-to-pdf': tool = new ImageToPDFTool(); break;
                 case 'compressor': tool = new CompressorTool(); break;
