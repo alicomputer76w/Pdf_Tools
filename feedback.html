@@ -38,22 +38,26 @@
         <p>Provide your name, WhatsApp number (with country code), and your message. It will open WhatsApp chat to the site owner automatically.</p>
 
         <form id="feedback-form" class="feedback-form" style="margin-top: 12px;">
-          <div class="form-field">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
+          <div class="feedback-grid">
+            <div class="form-field">
+              <label for="name">Your Name</label>
+              <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
+            </div>
+            <div class="form-field">
+              <label for="visitorNumber">Your WhatsApp Number (with country code)</label>
+              <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
+            </div>
           </div>
           <div class="form-field">
-            <label for="visitorNumber">Your WhatsApp Number (with country code)</label>
-            <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
+            <label for="message">Your Message</label>
+            <textarea id="message" name="message" rows="6" placeholder="Write your feedback here..." required></textarea>
           </div>
-          <div class="form-field">
-            <label for="message">Your Feedback</label>
-            <textarea id="message" name="message" rows="5" placeholder="Write your feedback here..." required></textarea>
+          <div class="form-actions">
+            <button type="submit" class="tool-btn">
+              <span>Send Message via WhatsApp</span>
+              <i class="material-icons">send</i>
+            </button>
           </div>
-          <button type="submit" class="tool-btn">
-            <span>Send via WhatsApp</span>
-            <i class="material-icons">send</i>
-          </button>
           <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9em;">Note: WhatsApp launch requires the app or web.whatsapp.com in your browser. No data is stored on this site.</p>
         </form>
       </div>
