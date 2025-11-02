@@ -178,7 +178,8 @@ class PDFUtils {
      * @returns {Promise<PDFLib.PDFDocument>} - Merged PDF
      */
     static async mergePDFs(pdfDocs) {
-        const mergedPdf = window.PDFLib.PDFDocument.create();
+        // PDFLib.PDFDocument.create() returns a Promise, so we must await it
+        const mergedPdf = await window.PDFLib.PDFDocument.create();
         
         for (const pdfDoc of pdfDocs) {
             const pageCount = pdfDoc.getPageCount();
