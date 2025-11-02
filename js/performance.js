@@ -699,7 +699,13 @@ if (typeof window !== 'undefined') {
 // Provide alias method expected by some callers
 if (typeof PerformanceManager !== 'undefined') {
     PerformanceManager.prototype.setCache = function(key, data, options = {}) {
-        return this.cache(key, data, options);
+        // Call the cache method directly on the instance
+        if (typeof this.cache === 'function') {
+            return this.cache(key, data, options);
+        } else {
+            console.warn('Cache method not available on this instance');
+            return false;
+        }
     };
 }
 

@@ -149,7 +149,7 @@
                         <i class="material-icons">lock</i>
                     </div>
                     <h3>Password Protector</h3>
-                    <p>Add password protection to PDF documents</p>
+                    <p>Add a lock watermark with password note (offline only)</p>
                     <button class="tool-btn" data-tool="password-protector">
                         <span>Select Tool</span>
                         <i class="material-icons">arrow_forward</i>
@@ -278,8 +278,8 @@
                     <div class="tool-icon">
                         <i class="material-icons">palette</i>
                     </div>
-                    <h3>Color Mode Converter</h3>
-                    <p>Convert between color modes (RGB, CMYK, Grayscale)</p>
+                    <h3>Color Converter</h3>
+                    <p>Convert pages to Grayscale, Sepia, Invert, or Desaturate</p>
                     <button class="tool-btn" data-tool="color-converter">
                         <span>Select Tool</span>
                         <i class="material-icons">arrow_forward</i>
@@ -411,13 +411,13 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="js/error-handler.js?v=1"></script>
-    <script src="js/utils.js?v=3"></script>
-    <script src="js/accessibility.js?v=1"></script>
-    <script src="js/drag-drop.js?v=1"></script>
-    <script src="js/performance.js?v=2"></script>
-    <script src="js/components.js?v=2"></script>
-    <script src="js/tools.js?v=13"></script>
+    <script src="js/error-handler.js?v=2"></script>
+    <script src="js/utils.js?v=4"></script>
+    <script src="js/accessibility.js?v=2"></script>
+    <script src="js/drag-drop.js?v=2"></script>
+    <script src="js/performance.js?v=3"></script>
+    <script src="js/components.js?v=3"></script>
+    <script src="js/tools.js?v=14"></script>
     <script>
         console.log('=== Script Loading Debug ===');
         console.log('PDF-lib loaded:', typeof PDFLib !== 'undefined');
@@ -437,6 +437,6 @@
             console.log('✅ ToolManager loaded successfully');
         }
     </script>
-    <script src="js/app.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
 </body>
 </html>

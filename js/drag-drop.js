@@ -85,7 +85,9 @@ class DragDropManager {
             accept: ['pdf', 'image'],
             multiple: true,
             onDrop: (files) => this.handleMainDrop(files),
-            className: 'main-drop-zone'
+            className: 'main-drop-zone',
+            // Do NOT trigger file selection on Space/Enter for the whole page
+            keyboardActivation: false
         });
 
         // Tool-specific drop zones will be registered when tools are opened
@@ -134,6 +136,8 @@ class DragDropManager {
             onDragOver: options.onDragOver || (() => {}),
             className: options.className || '',
             maxSize: options.maxSize || 50 * 1024 * 1024, // 50MB default
+            // Whether Space/Enter should trigger file selection for this drop zone
+            keyboardActivation: options.keyboardActivation !== undefined ? options.keyboardActivation : true,
             ...options
         };
 
@@ -562,11 +566,33 @@ class DragDropManager {
     setupAccessibility() {
         // Add keyboard support for drop zones
         document.addEventListener('keydown', (e) => {
+            // Ignore when typing in form fields/contenteditable elements
+            const target = e.target;
+            const isTypingField = (
+                target instanceof HTMLElement && (
+                    target.tagName === 'INPUT' ||
+                    target.tagName === 'TEXTAREA' ||
+                    target.tagName === 'SELECT' ||
+                    target.isContentEditable
+                )
+            );
+            if (isTypingField) return;
+
             if (e.key === 'Enter' || e.key === ' ') {
-                const dropZone = e.target.closest('.drop-zone');
+                const dropZone = target.closest('.drop-zone');
                 if (dropZone) {
-                    e.preventDefault();
-                    this.triggerFileSelection(dropZone);
+                    const config = this.dropZones.get(dropZone);
+                    // Only activate keyboard selection if enabled for this specific zone
+                    if (config && config.keyboardActivation) {
+                        // Require that the focused element is the drop zone itself
+                        // or a direct child explicitly meant to activate it
+                        const focusedEl = document.activeElement;
+                        const isOnZone = (focusedEl === dropZone) || focusedEl.closest('.tool-drop-zone') === dropZone;
+                        if (isOnZone) {
+                            e.preventDefault();
+                            this.triggerFileSelection(dropZone);
+                        }
+                    }
                 }
             }
         });

@@ -1136,6 +1136,17 @@ class ColorConverterTool extends BaseTool {
                     <label class="option-label" for="color-file">Select a PDF file:</label>
                     <input type="file" id="color-file" accept="application/pdf" />
                 </div>
+                <div class="tool-options">
+                    <div class="option-group">
+                        <label class="option-label">Mode:</label>
+                        <select class="option-input" id="color-mode">
+                            <option value="grayscale">Grayscale</option>
+                            <option value="sepia">Sepia</option>
+                            <option value="invert">Invert</option>
+                            <option value="desaturate">Desaturate</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
                     <button class="btn btn-primary" id="color-process">
@@ -1145,12 +1156,13 @@ class ColorConverterTool extends BaseTool {
                 </div>
             </div>`;
     }
-    async execute(files) {
+    async execute(files, options = {}) {
         if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
         const file = files[0];
         const data = await file.arrayBuffer();
         const pdf = await window.pdfjsLib.getDocument({ data }).promise;
         const doc = await window.PDFLib.PDFDocument.create();
+        const mode = (options.mode || 'grayscale').toLowerCase();
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 1 });
@@ -1158,13 +1170,37 @@ class ColorConverterTool extends BaseTool {
             const ctx = canvas.getContext('2d');
             canvas.width = viewport.width; canvas.height = viewport.height;
             await page.render({ canvasContext: ctx, viewport }).promise;
-            // Grayscale conversion
+            // Color conversion
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const dataArr = imgData.data;
             for (let p = 0; p < dataArr.length; p += 4) {
                 const r = dataArr[p], g = dataArr[p + 1], b = dataArr[p + 2];
-                const y = 0.299 * r + 0.587 * g + 0.114 * b;
-                dataArr[p] = dataArr[p + 1] = dataArr[p + 2] = y;
+                let nr = r, ng = g, nb = b;
+                switch (mode) {
+                    case 'grayscale': {
+                        const y = 0.299 * r + 0.587 * g + 0.114 * b;
+                        nr = ng = nb = y;
+                        break;
+                    }
+                    case 'sepia': {
+                        nr = Math.min(255, 0.393 * r + 0.769 * g + 0.189 * b);
+                        ng = Math.min(255, 0.349 * r + 0.686 * g + 0.168 * b);
+                        nb = Math.min(255, 0.272 * r + 0.534 * g + 0.131 * b);
+                        break;
+                    }
+                    case 'invert': {
+                        nr = 255 - r; ng = 255 - g; nb = 255 - b;
+                        break;
+                    }
+                    case 'desaturate': {
+                        const max = Math.max(r, g, b);
+                        const min = Math.min(r, g, b);
+                        const l = (max + min) / 2; // lightness
+                        nr = ng = nb = l;
+                        break;
+                    }
+                }
+                dataArr[p] = nr; dataArr[p + 1] = ng; dataArr[p + 2] = nb;
             }
             ctx.putImageData(imgData, 0, 0);
             const blob = await ImageUtils.canvasToBlob(canvas, 'image/jpeg', 0.9);
@@ -1175,16 +1211,18 @@ class ColorConverterTool extends BaseTool {
             newPage.drawImage(img, { x: 0, y: 0, width, height });
         }
         const pdfBytes = await doc.save();
-        const filename = `${file.name.replace(/\.pdf$/i, '')}_grayscale.pdf`;
+        const suffix = mode === 'grayscale' ? 'grayscale' : (mode === 'sepia' ? 'sepia' : (mode === 'invert' ? 'inverted' : 'desaturated'));
+        const filename = `${file.name.replace(/\.pdf$/i, '')}_${suffix}.pdf`;
         DownloadUtils.downloadPDF(pdfBytes, filename);
-        return { success: true, message: 'Converted to grayscale' };
+        return { success: true, message: `Converted to ${suffix}` };
     }
     attachHandlers() {
         const input = document.getElementById('color-file');
+        const modeSel = document.getElementById('color-mode');
         const btn = document.getElementById('color-process');
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
-            try { modalManager.showProgress('Converting Colors...', 'Processing PDF...'); await this.execute(files); window.notificationManager?.show('Converted successfully!', 'success'); }
+            try { modalManager.showProgress('Converting Colors...', 'Processing PDF...'); await this.execute(files, { mode: modeSel?.value }); window.notificationManager?.show('Converted successfully!', 'success'); }
             catch (err) { window.notificationManager?.show(`Color conversion failed: ${err.message}`, 'error'); }
             finally { modalManager.hideProgress(); }
         });
