@@ -4,71 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Feedback • PDF Tools Suite</title>
-  <link rel="stylesheet" href="css/feedback-modern.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
   <meta name="description" content="Share your feedback about PDF Tools Suite via WhatsApp." />
   <link rel="canonical" href="https://alicomputer76w.github.io/Pdf_Tools/feedback.html">
 </head>
-
 <body>
   <header class="header">
-    <div class="container header-content">
-      <div class="logo">
-        <i class="material-icons">picture_as_pdf</i>
-        <h1>PDF Tools Suite</h1>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <i class="material-icons">picture_as_pdf</i>
+          <h1>PDF Tools Suite</h1>
+        </div>
+        <nav class="top-nav-links" aria-label="Primary Navigation" style="display: flex; gap: 16px; align-items: center; margin-left: auto;">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="about.html" class="nav-link">About</a>
+          <a href="feedback.html" class="nav-link" aria-current="page">Feedback</a>
+        </nav>
       </div>
-      <nav class="top-nav-links">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="about.html" class="nav-link">About</a>
-        <a href="feedback.html" class="nav-link active" aria-current="page">Feedback</a>
-      </nav>
     </div>
   </header>
 
-  <main class="feedback-wrapper">
-    <section class="feedback-card">
-      <div class="feedback-header">
-        <h2>💬 Share Your Feedback</h2>
-        <p>Your opinion helps us make <strong>PDF Tools Suite</strong> better!</p>
+  <main class="container" style="max-width: 960px; margin: 0 auto; padding: 24px 20px;">
+    <section class="feedback-section">
+      <div class="feedback-card">
+        <div class="feedback-title-wrap">
+          <h2>
+            <span>Send Feedback on WhatsApp</span>
+            <span class="feedback-badge">Quick & Secure</span>
+          </h2>
+        </div>
+        <p>Provide your name, WhatsApp number (with country code), and your message. It will open WhatsApp chat to the site owner automatically.</p>
+
+        <form id="feedback-form" class="feedback-form" style="margin-top: 12px;">
+          <div class="feedback-grid">
+            <div class="form-field">
+              <label for="name">Your Name</label>
+              <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
+            </div>
+            <div class="form-field">
+              <label for="visitorNumber">Your WhatsApp Number (with country code)</label>
+              <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="message">Your Message</label>
+            <textarea id="message" name="message" rows="6" placeholder="Write your feedback here..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="tool-btn">
+              <span>Send Message via WhatsApp</span>
+              <i class="material-icons">send</i>
+            </button>
+          </div>
+          <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9em;">Note: WhatsApp launch requires the app or web.whatsapp.com in your browser. No data is stored on this site.</p>
+        </form>
       </div>
 
-      <form id="feedback-form">
-        <div class="input-group">
-          <label for="name"><i class="material-icons">person</i> Your Name</label>
-          <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
-        </div>
-
-        <div class="input-group">
-          <label for="visitorNumber"><i class="material-icons">phone</i> WhatsApp Number</label>
-          <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
-        </div>
-
-        <div class="input-group">
-          <label for="message"><i class="material-icons">message</i> Your Message</label>
-          <textarea id="message" name="message" rows="6" placeholder="Write your feedback here..." required></textarea>
-        </div>
-
-        <button type="submit" class="send-btn">
-          <i class="material-icons">send</i> Send via WhatsApp
-        </button>
-
-        <p class="note">📱 WhatsApp Web or App is required. No data is stored on this site.</p>
-      </form>
+      
     </section>
   </main>
 
-  <footer class="footer">
-    <p>© 2025 • PDF Tools Suite — All processing happens locally in your browser.</p>
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand"><strong>PDF Tools Suite</strong> <span class="footer-version">• v13</span></div>
+      <nav class="footer-nav" aria-label="Footer Navigation">
+        <a href="index.html" class="footer-link">Home</a>
+        <a href="about.html" class="footer-link">About</a>
+        <a href="policy.html" class="footer-link">Privacy Policy</a>
+      </nav>
+      <div class="footer-meta"><span>© 2025 • All processing is local in your browser</span></div>
+    </div>
   </footer>
 
   <script>
-    const OWNER_WHATSAPP = '923081517640';
+    // Replace this with your actual WhatsApp number in international format (no '+'). Example: 923001234567
+    const OWNER_WHATSAPP = '923081517640'; // Owner WhatsApp number in international format (no '+')
+    // Customize incoming WhatsApp message with site identity
     const SITE_NAME = 'PDF Tools Suite';
     const SITE_URL = 'https://alicomputer76w.github.io/Pdf_Tools/';
 
     document.getElementById('feedback-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
-      const visitorNumber = document.getElementById('visitorNumber').value.replace(/[^0-9]/g, '');
+      const visitorNumberRaw = document.getElementById('visitorNumber').value.trim();
+      const visitorNumber = visitorNumberRaw.replace(/[^0-9]/g, ''); // keep digits only
       const message = document.getElementById('message').value.trim();
 
       if (!name || !visitorNumber || !message) {
@@ -77,7 +98,7 @@
       }
 
       const text = [
-        `📩 ${SITE_NAME} — Website Feedback`,
+        `\ud83d\udce9 ${SITE_NAME} — Website Feedback`,
         `Source: ${SITE_URL}`,
         `Sender: ${name}`,
         `Visitor WhatsApp: +${visitorNumber}`,
@@ -94,3 +115,4 @@
   </script>
 </body>
 </html>
+
