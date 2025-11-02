@@ -44,8 +44,12 @@
               <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
             </div>
             <div class="form-field">
-              <label for="visitorNumber">Your WhatsApp Number (with country code)</label>
-              <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
+              <label for="visitorNumber">Your WhatsApp Number (optional, with country code)</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" />
+                <button type="button" id="verify-wa" class="tool-btn" style="padding:8px 12px; font-weight:600;">Verify on WhatsApp</button>
+              </div>
+              <small style="display:block; margin-top:6px; color: var(--text-secondary);">Note: Message will be sent from your own logged‑in WhatsApp account. The number you enter is only included in the message for reference.</small>
             </div>
           </div>
           <div class="form-field">
@@ -92,8 +96,8 @@
       const visitorNumber = visitorNumberRaw.replace(/[^0-9]/g, ''); // keep digits only
       const message = document.getElementById('message').value.trim();
 
-      if (!name || !visitorNumber || !message) {
-        alert('Please fill in all fields.');
+      if (!name || !message) {
+        alert('Please fill in your name and message. WhatsApp number is optional.');
         return;
       }
 
@@ -101,7 +105,7 @@
         `\ud83d\udce9 ${SITE_NAME} — Website Feedback`,
         `Source: ${SITE_URL}`,
         `Sender: ${name}`,
-        `Visitor WhatsApp: +${visitorNumber}`,
+        ...(visitorNumber ? [`Visitor WhatsApp (claimed): +${visitorNumber}`] : []),
         '',
         'Message:',
         message,
@@ -111,6 +115,23 @@
       ].join('\n');
       const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
+    });
+
+    // Optional: allow user to quickly verify if a number has WhatsApp by opening wa.me/<number>
+    document.getElementById('verify-wa').addEventListener('click', function() {
+      const raw = document.getElementById('visitorNumber').value.trim();
+      const num = raw.replace(/[^0-9]/g, '');
+      if (!num) {
+        alert('Please enter a number to verify.');
+        return;
+      }
+      if (num.length < 8 || num.length > 15) {
+        alert('Please enter a valid international number without + (8–15 digits).');
+        return;
+      }
+      // Open WhatsApp chat to that number; if the number is not on WhatsApp, WhatsApp will show an error screen.
+      const checkUrl = `https://wa.me/${num}`;
+      window.open(checkUrl, '_blank');
     });
   </script>
 </body>
