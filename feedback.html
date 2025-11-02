@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feedback • PDF Tools Suite</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <meta name="description" content="Share your feedback about PDF Tools Suite via WhatsApp." />
+  <link rel="canonical" href="https://alicomputer76w.github.io/Pdf_Tools/feedback.html">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <i class="material-icons">picture_as_pdf</i>
+          <h1>PDF Tools Suite</h1>
+        </div>
+        <nav class="top-nav-links" aria-label="Primary Navigation" style="display: flex; gap: 16px; align-items: center; margin-left: auto;">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="about.html" class="nav-link">About</a>
+          <a href="feedback.html" class="nav-link" aria-current="page">Feedback</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 760px; margin: 0 auto; padding: 24px 20px;">
+    <section>
+      <h2>Send Feedback on WhatsApp</h2>
+      <p style="color: var(--text-secondary);">Provide your name, WhatsApp number (with country code), and your message. It will open WhatsApp chat to the site owner automatically.</p>
+
+      <form id="feedback-form" style="margin-top: 16px;">
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
+        </div>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="visitorNumber">Your WhatsApp Number (with country code)</label>
+          <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" required />
+        </div>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="message">Your Feedback</label>
+          <textarea id="message" name="message" rows="5" placeholder="Write your feedback here..." required></textarea>
+        </div>
+        <button type="submit" class="tool-btn">
+          <span>Send via WhatsApp</span>
+          <i class="material-icons">send</i>
+        </button>
+      </form>
+
+      <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9em;">Note: WhatsApp launch requires the app or web.whatsapp.com in your browser. No data is stored on this site.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand"><strong>PDF Tools Suite</strong> <span class="footer-version">• v13</span></div>
+      <nav class="footer-nav" aria-label="Footer Navigation">
+        <a href="index.html" class="footer-link">Home</a>
+        <a href="about.html" class="footer-link">About</a>
+        <a href="policy.html" class="footer-link">Privacy Policy</a>
+      </nav>
+      <div class="footer-meta"><span>© 2025 • All processing is local in your browser</span></div>
+    </div>
+  </footer>
+
+  <script>
+    // Replace this with your actual WhatsApp number in international format (no '+'). Example: 923001234567
+    const OWNER_WHATSAPP = '923081517640'; // Owner WhatsApp number in international format (no '+')
+
+    document.getElementById('feedback-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const visitorNumber = document.getElementById('visitorNumber').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!name || !visitorNumber || !message) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const text = `Feedback from: ${name}\nVisitor WhatsApp: ${visitorNumber}\n\nMessage:\n${message}`;
+      const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    });
+  </script>
+</body>
+</html>
