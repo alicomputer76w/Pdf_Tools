@@ -36,7 +36,11 @@ class PDFMergerTool extends BaseTool {
     createInterface() {
         return `
             <div class="tool-interface">
-                <div id="merger-upload"></div>
+                <div class="upload-section">
+                    <label class="option-label" for="merger-files">Select PDF files to merge:</label>
+                    <input type="file" id="merger-files" accept="application/pdf" multiple />
+                    <p class="hint">Tip: Select 2 or more PDF files. Order will follow selection order.</p>
+                </div>
                 <div class="tool-options">
                     <div class="option-group">
                         <label class="option-label">Output filename:</label>
@@ -60,12 +64,22 @@ class PDFMergerTool extends BaseTool {
         }
 
         try {
-            const mergedPdf = await mergePDFs(files);
+            // Convert File objects into PDFLib documents
+            const pdfDocs = [];
+            for (const file of files) {
+                const buffer = await file.arrayBuffer();
+                const doc = await window.PDFLib.PDFDocument.load(buffer);
+                pdfDocs.push(doc);
+            }
+
+            // Merge and save using PDFUtils
+            const mergedDoc = await PDFUtils.mergePDFs(pdfDocs);
+            const pdfBytes = await PDFUtils.savePDF(mergedDoc);
             const filename = options.filename || 'merged-document.pdf';
-            
+
             // Download the merged PDF
-            downloadFile(mergedPdf, filename, 'application/pdf');
-            
+            DownloadUtils.downloadPDF(pdfBytes, filename);
+
             return {
                 success: true,
                 message: `Successfully merged ${files.length} PDFs into ${filename}`
@@ -73,6 +87,39 @@ class PDFMergerTool extends BaseTool {
         } catch (error) {
             throw new Error(`Failed to merge PDFs: ${error.message}`);
         }
+    }
+
+    attachHandlers() {
+        const processBtn = document.getElementById('merger-process');
+        const fileInput = document.getElementById('merger-files');
+        const nameInput = document.getElementById('merger-filename');
+
+        if (!processBtn) return;
+
+        processBtn.addEventListener('click', async () => {
+            try {
+                const files = Array.from(fileInput?.files || []);
+                if (!files || files.length < 2) {
+                    window.notificationManager?.show('Please select at least 2 PDF files to merge.', 'warning');
+                    return;
+                }
+
+                const filename = (nameInput?.value || 'merged-document.pdf').trim();
+
+                // Show progress modal
+                await modalManager.showProgress('Merging PDFs...', 'Please wait while we merge your files.');
+                // Execute merge
+                await this.execute(files, { filename });
+                // Mark complete
+                modalManager.updateProgress(100, 'Completed');
+                window.notificationManager?.show('PDFs merged successfully!', 'success');
+            } catch (err) {
+                console.error('Merge failed:', err);
+                window.notificationManager?.show(`Merge failed: ${err.message}`, 'error', { persistent: true });
+            } finally {
+                modalManager.hideProgress();
+            }
+        });
     }
 }
 
@@ -121,10 +168,11 @@ class ToolManager {
     }
 
     setupEventListeners() {
-        // Setup tool button listeners
+        // Setup tool button listeners (use closest to capture clicks on inner elements)
         document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-tool]')) {
-                const toolId = e.target.getAttribute('data-tool');
+            const toolBtn = e.target.closest('[data-tool]');
+            if (toolBtn) {
+                const toolId = toolBtn.getAttribute('data-tool');
                 this.openTool(toolId);
             }
         });
@@ -134,23 +182,21 @@ class ToolManager {
         const tool = this.getTool(toolId);
         if (!tool) {
             console.error(`Tool "${toolId}" not found`);
-            alert(`Tool "${toolId}" not found!`);
             return;
         }
 
         try {
-            const toolInterface = tool.createInterface();
+            const content = tool.createInterface();
             console.log(`Opening tool: ${tool.name}`);
-            
-            // Show a notification that the tool is being opened
-            alert(`${tool.name} tool selected! This feature is under development.`);
-            
-            // In a real implementation, this would open a modal
-            console.log('Tool interface created successfully');
-            
+            // Open modal with tool UI
+            modalManager.openModal('tool-modal', tool.name, content);
+            // Attach tool-specific handlers
+            if (typeof tool.attachHandlers === 'function') {
+                tool.attachHandlers();
+            }
         } catch (error) {
             console.error(`Failed to open tool: ${error.message}`);
-            alert(`Failed to open ${tool.name}: ${error.message}`);
+            window.notificationManager?.show(`Failed to open ${tool.name}: ${error.message}`, 'error');
         }
     }
 }
