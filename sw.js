@@ -3,13 +3,15 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = 'pdf-tools-suite-v1.0.1';
-const STATIC_CACHE = 'pdf-tools-static-v1.0.1';
+const CACHE_NAME = 'pdf-tools-suite-v1.0.2';
+const STATIC_CACHE = 'pdf-tools-static-v1.0.2';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
     '/',
     '/index.html',
+    '/about.html',
+    '/policy.html',
     '/css/styles.css',
     '/css/components.css',
     '/js/app.js',
