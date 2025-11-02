@@ -83,13 +83,16 @@
   </footer>
 
   <script>
+    // Optional backend verification endpoint. Set this to your deployed server URL to enable advanced WhatsApp number validation.
+    // Example: const WA_VERIFY_ENDPOINT = 'https://your-domain.com/api/verify-whatsapp';
+    const WA_VERIFY_ENDPOINT = '';
     // Replace this with your actual WhatsApp number in international format (no '+'). Example: 923001234567
     const OWNER_WHATSAPP = '923081517640'; // Owner WhatsApp number in international format (no '+')
     // Customize incoming WhatsApp message with site identity
     const SITE_NAME = 'PDF Tools Suite';
     const SITE_URL = 'https://alicomputer76w.github.io/Pdf_Tools/';
 
-    document.getElementById('feedback-form').addEventListener('submit', function(e) {
+    document.getElementById('feedback-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
       const visitorNumberRaw = document.getElementById('visitorNumber').value.trim();
@@ -114,11 +117,37 @@
         'یہ فیڈبیک ہماری ویب سائٹ سے بھیجا گیا ہے۔'
       ].join('\n');
       const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+
+      const proceed = () => {
+        window.open(url, '_blank');
+      };
+
+      if (WA_VERIFY_ENDPOINT && visitorNumber) {
+        try {
+          const resp = await fetch(WA_VERIFY_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number: visitorNumber })
+          });
+          if (!resp.ok) throw new Error('Verification service error');
+          const data = await resp.json();
+          if (data.status === 'valid') {
+            proceed();
+          } else {
+            alert('This number is not on WhatsApp. Please use a valid WhatsApp number or leave the field empty.');
+          }
+        } catch (err) {
+          console.warn('Verification failed:', err);
+          alert('Verification is currently unavailable. Proceeding to WhatsApp from your logged-in account.');
+          proceed();
+        }
+      } else {
+        proceed();
+      }
     });
 
     // Optional: allow user to quickly verify if a number has WhatsApp by opening wa.me/<number>
-    document.getElementById('verify-wa').addEventListener('click', function() {
+    document.getElementById('verify-wa').addEventListener('click', async function() {
       const raw = document.getElementById('visitorNumber').value.trim();
       const num = raw.replace(/[^0-9]/g, '');
       if (!num) {
@@ -129,9 +158,31 @@
         alert('Please enter a valid international number without + (8–15 digits).');
         return;
       }
-      // Open WhatsApp chat to that number; if the number is not on WhatsApp, WhatsApp will show an error screen.
-      const checkUrl = `https://wa.me/${num}`;
-      window.open(checkUrl, '_blank');
+      // If backend verification is configured, use it; otherwise fallback to wa.me
+      if (WA_VERIFY_ENDPOINT) {
+        try {
+          const resp = await fetch(WA_VERIFY_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number: num })
+          });
+          if (!resp.ok) throw new Error('Verification service error');
+          const data = await resp.json();
+          if (data.status === 'valid') {
+            alert('This number is on WhatsApp ✅');
+          } else {
+            alert('This number is not on WhatsApp ❌');
+          }
+        } catch (err) {
+          console.warn('Verification failed:', err);
+          alert('Verification service unavailable, opening WhatsApp check page...');
+          const checkUrl = `https://wa.me/${num}`;
+          window.open(checkUrl, '_blank');
+        }
+      } else {
+        const checkUrl = `https://wa.me/${num}`;
+        window.open(checkUrl, '_blank');
+      }
     });
   </script>
 </body>
