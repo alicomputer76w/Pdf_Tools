@@ -504,6 +504,7 @@ class PerformanceManager {
         resources.forEach(resource => {
             if (!this.getFromCache(`prefetch-${resource}`)) {
                 this.prefetchResource(resource);
+                // Use cache() API; provide setCache alias for compatibility
                 this.setCache(`prefetch-${resource}`, true, { ttl: 300000 }); // 5 minutes
             }
         });
@@ -512,10 +513,16 @@ class PerformanceManager {
     getToolResources(toolId) {
         // Define tool-specific resources that might be needed
         const toolResources = {
-            'pdf-merger': ['icons/merge.svg'],
-            'pdf-splitter': ['icons/split.svg'],
+            'merger': ['icons/merge.svg'],
+            'splitter': ['icons/split.svg'],
             'pdf-to-image': ['icons/image.svg'],
-            'image-to-pdf': ['icons/pdf.svg']
+            'image-to-pdf': ['icons/pdf.svg'],
+            'compressor': ['icons/pdf.svg'],
+            'optimizer': ['icons/pdf.svg'],
+            'resizer': ['icons/pdf.svg'],
+            'color-converter': ['icons/pdf.svg'],
+            'rotator': ['icons/pdf.svg'],
+            'watermark': ['icons/pdf.svg']
         };
 
         return toolResources[toolId] || [];
@@ -687,6 +694,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose class to window for debug checks
 if (typeof window !== 'undefined') {
     window.PerformanceManager = PerformanceManager;
+}
+
+// Provide alias method expected by some callers
+if (typeof PerformanceManager !== 'undefined') {
+    PerformanceManager.prototype.setCache = function(key, data, options = {}) {
+        return this.cache(key, data, options);
+    };
 }
 
 // Export for use in other modules
