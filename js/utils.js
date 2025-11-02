@@ -386,7 +386,14 @@ class StorageUtils {
     static load(key, defaultValue = null) {
         try {
             const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
+            if (item === null) return defaultValue;
+            // Gracefully handle legacy non-JSON values (e.g., 'light', 'dark')
+            try {
+                return JSON.parse(item);
+            } catch (parseError) {
+                // If parsing fails, return the raw string value
+                return item;
+            }
         } catch (error) {
             console.warn('Failed to load from localStorage:', error);
             return defaultValue;
@@ -430,7 +437,13 @@ class LocalStorageManager {
     static get(key, defaultValue = null) {
         try {
             const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
+            if (item === null) return defaultValue;
+            try {
+                return JSON.parse(item);
+            } catch (parseError) {
+                // Fallback to raw string when legacy non-JSON values are stored
+                return item;
+            }
         } catch (error) {
             console.warn(`Failed to get localStorage item "${key}":`, error);
             return defaultValue;

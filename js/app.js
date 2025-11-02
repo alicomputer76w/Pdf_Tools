@@ -694,7 +694,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // Handle service worker registration for offline functionality
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        // Use a relative path so GitHub Pages serves /Pdf_Tools/sw.js instead of root /sw.js
+        const swUrl = 'sw.js';
+        navigator.serviceWorker.register(swUrl, { scope: './' })
             .then(registration => {
                 console.log('Service Worker registered successfully');
             })

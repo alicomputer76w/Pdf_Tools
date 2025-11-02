@@ -684,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.performanceManager = new PerformanceManager();
 });
 
+// Expose class to window for debug checks
+if (typeof window !== 'undefined') {
+    window.PerformanceManager = PerformanceManager;
+}
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PerformanceManager;
