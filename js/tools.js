@@ -313,10 +313,17 @@ class ToolManager {
     }
 
     async openTool(toolId) {
-        const tool = this.getTool(toolId);
+        let tool = this.getTool(toolId);
         if (!tool) {
             console.error(`Tool "${toolId}" not found`);
             return;
+        }
+
+        // Runtime guard: ensure Splitter opens the correct tool
+        if (toolId === 'splitter' && tool?.constructor?.name !== 'PDFSplitterTool') {
+            console.warn('Splitter tool mapping was incorrect. Re-registering PDFSplitterTool.');
+            tool = new PDFSplitterTool();
+            this.registerTool('splitter', tool);
         }
 
         try {
