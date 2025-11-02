@@ -77,9 +77,19 @@ class ModalManager {
     }
 
     closeModal() {
+        // Prefer closing the tracked active modal
         if (this.activeModal) {
             this.activeModal.classList.remove('active');
             this.activeModal = null;
+            document.body.style.overflow = '';
+            return;
+        }
+
+        // Fallback: if no activeModal is tracked (e.g., after progress modal),
+        // close any open modal element in the DOM
+        const anyActiveModal = document.querySelector('.modal.active');
+        if (anyActiveModal) {
+            anyActiveModal.classList.remove('active');
             document.body.style.overflow = '';
         }
     }
