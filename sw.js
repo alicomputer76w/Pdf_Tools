@@ -15,7 +15,7 @@ const STATIC_FILES = [
     '/js/app.js',
     '/js/utils.js',
     '/js/components.js',
-    '/js/tools.js?v=12',
+    '/js/tools.js?v=13',
     'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',

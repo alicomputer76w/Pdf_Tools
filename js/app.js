@@ -699,6 +699,23 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register(swUrl, { scope: './' })
             .then(registration => {
                 console.log('Service Worker registered successfully');
+                // If there's an updated service worker waiting, activate it immediately
+                if (registration.waiting) {
+                    console.log('Service Worker update found. Activating new version...');
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+                // Listen for updates and activate immediately
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    if (newWorker) {
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('New Service Worker installed. Activating...');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    }
+                });
             })
             .catch(error => {
                 console.log('Service Worker registration failed');

@@ -826,6 +826,29 @@ class WatermarkTool extends BaseTool {
 class ToolManager {
     constructor() {
         this.tools = new Map();
+        // Expected class names per tool ID for runtime self-heal
+        this.expectedToolClasses = {
+            'merger': 'PDFMergerTool',
+            'splitter': 'PDFSplitterTool',
+            'pdf-to-word': 'TextExtractorTool',
+            'pdf-to-image': 'PDFToImageTool',
+            'image-to-pdf': 'ImageToPDFTool',
+            'compressor': 'CompressorTool',
+            'password-protector': 'PasswordProtectorTool',
+            'watermark': 'WatermarkTool',
+            'rotator': 'RotatorTool',
+            'metadata': 'MetadataTool',
+            'form-filler': 'FormFillerTool',
+            'signature': 'SignatureTool',
+            'text-extractor': 'TextExtractorTool',
+            'page-numbering': 'PageNumberingTool',
+            'bookmark': 'BookmarkTool',
+            'resizer': 'ResizerTool',
+            'color-converter': 'ColorConverterTool',
+            'ocr': 'OCRTool',
+            'annotation': 'AnnotationTool',
+            'optimizer': 'OptimizerTool'
+        };
         this.initializeTools();
         this.setupEventListeners();
     }
@@ -881,12 +904,34 @@ class ToolManager {
             console.error(`Tool "${toolId}" not found`);
             return;
         }
-
-        // Runtime guard: ensure Splitter opens the correct tool
-        if (toolId === 'splitter' && tool?.constructor?.name !== 'PDFSplitterTool') {
-            console.warn('Splitter tool mapping was incorrect. Re-registering PDFSplitterTool.');
-            tool = new PDFSplitterTool();
-            this.registerTool('splitter', tool);
+        // Runtime guard: self-heal incorrect tool mapping from stale caches or old builds
+        const expected = this.expectedToolClasses[toolId];
+        if (expected && tool?.constructor?.name !== expected) {
+            console.warn(`Tool mapping mismatch for "${toolId}". Expected ${expected}, but found ${tool?.constructor?.name}. Re-registering correct tool.`);
+            // Instantiate the correct class
+            switch (toolId) {
+                case 'merger': tool = new PDFMergerTool(); break;
+                case 'splitter': tool = new PDFSplitterTool(); break;
+                case 'pdf-to-word': tool = new TextExtractorTool(); break;
+                case 'pdf-to-image': tool = new PDFToImageTool(); break;
+                case 'image-to-pdf': tool = new ImageToPDFTool(); break;
+                case 'compressor': tool = new CompressorTool(); break;
+                case 'password-protector': tool = new PasswordProtectorTool(); break;
+                case 'watermark': tool = new WatermarkTool(); break;
+                case 'rotator': tool = new RotatorTool(); break;
+                case 'metadata': tool = new MetadataTool(); break;
+                case 'form-filler': tool = new FormFillerTool(); break;
+                case 'signature': tool = new SignatureTool(); break;
+                case 'text-extractor': tool = new TextExtractorTool(); break;
+                case 'page-numbering': tool = new PageNumberingTool(); break;
+                case 'bookmark': tool = new BookmarkTool(); break;
+                case 'resizer': tool = new ResizerTool(); break;
+                case 'color-converter': tool = new ColorConverterTool(); break;
+                case 'ocr': tool = new OCRTool(); break;
+                case 'annotation': tool = new AnnotationTool(); break;
+                case 'optimizer': tool = new OptimizerTool(); break;
+            }
+            this.registerTool(toolId, tool);
         }
 
         try {
