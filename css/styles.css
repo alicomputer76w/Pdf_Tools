@@ -234,9 +234,10 @@ p {
     gap: 20px;
 }
 
+/* Keep single-column layout even on wide screens when no aside/image is present */
 @media (min-width: 900px) {
     .feedback-section {
-        grid-template-columns: 1.2fr 0.8fr;
+        grid-template-columns: 1fr;
         align-items: start;
     }
 }
