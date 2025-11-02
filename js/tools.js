@@ -127,6 +127,137 @@ class PDFMergerTool extends BaseTool {
 }
 
 /**
+ * PDF Splitter Tool
+ */
+class PDFSplitterTool extends BaseTool {
+    constructor() {
+        super('PDF Splitter', 'Extract specific pages from PDF documents');
+    }
+
+    createInterface() {
+        return `
+            <div class="tool-interface">
+                <div class="upload-section">
+                    <label class="option-label" for="splitter-file">Select a PDF file to split:</label>
+                    <input type="file" id="splitter-file" accept="application/pdf" />
+                    <p class="hint">Tip: Enter pages like 1,3,5-7 to extract specific pages and ranges.</p>
+                </div>
+                <div class="tool-options">
+                    <div class="option-group">
+                        <label class="option-label">Pages to extract:</label>
+                        <input type="text" class="option-input" id="splitter-pages" placeholder="e.g., 1,3,5-7">
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Output filename:</label>
+                        <input type="text" class="option-input" id="splitter-filename" value="extracted-pages.pdf">
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" id="splitter-process">
+                        <i class="material-icons">content_cut</i>
+                        <span>Split PDF</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Parse page expression like "1,3,5-7" into zero-based indices
+     */
+    parsePagesExpression(expr, maxPageCount) {
+        const pages = new Set();
+        const sanitized = (expr || '').trim();
+        if (!sanitized) return [];
+
+        const parts = sanitized.split(',').map(p => p.trim()).filter(Boolean);
+        for (const part of parts) {
+            if (part.includes('-')) {
+                const [startStr, endStr] = part.split('-');
+                let start = parseInt(startStr, 10);
+                let end = parseInt(endStr, 10);
+                if (Number.isNaN(start) || Number.isNaN(end)) continue;
+                // Clamp and normalize
+                start = Math.max(1, Math.min(start, maxPageCount));
+                end = Math.max(1, Math.min(end, maxPageCount));
+                if (start > end) [start, end] = [end, start];
+                for (let n = start; n <= end; n++) pages.add(n - 1);
+            } else {
+                let n = parseInt(part, 10);
+                if (Number.isNaN(n)) continue;
+                n = Math.max(1, Math.min(n, maxPageCount));
+                pages.add(n - 1);
+            }
+        }
+        return Array.from(pages).sort((a, b) => a - b);
+    }
+
+    async execute(files, options = {}) {
+        if (!files || files.length !== 1) {
+            throw new Error('Select exactly one PDF file to split');
+        }
+
+        try {
+            const file = files[0];
+            const sourcePdf = await PDFUtils.loadPDF(file);
+            const pageCount = PDFUtils.getPageCount(sourcePdf);
+            const indices = this.parsePagesExpression(options.pages, pageCount);
+            if (!indices.length) {
+                throw new Error('Please provide valid pages to extract');
+            }
+
+            const newPdf = await PDFUtils.extractPages(sourcePdf, indices);
+            const pdfBytes = await PDFUtils.savePDF(newPdf);
+            const filename = (options.filename || 'extracted-pages.pdf').trim();
+            DownloadUtils.downloadPDF(pdfBytes, filename);
+
+            return {
+                success: true,
+                message: `Extracted ${indices.length} page(s) to ${filename}`
+            };
+        } catch (error) {
+            throw new Error(`Failed to split PDF: ${error.message}`);
+        }
+    }
+
+    attachHandlers() {
+        const processBtn = document.getElementById('splitter-process');
+        const fileInput = document.getElementById('splitter-file');
+        const pagesInput = document.getElementById('splitter-pages');
+        const nameInput = document.getElementById('splitter-filename');
+
+        if (!processBtn) return;
+
+        processBtn.addEventListener('click', async () => {
+            try {
+                const files = Array.from(fileInput?.files || []);
+                if (!files || files.length !== 1) {
+                    window.notificationManager?.show('Please select exactly one PDF file.', 'warning');
+                    return;
+                }
+
+                const pagesExpr = (pagesInput?.value || '').trim();
+                const filename = (nameInput?.value || 'extracted-pages.pdf').trim();
+
+                // Show progress modal (do not await)
+                modalManager.showProgress('Splitting PDF...', 'Preparing selection...');
+                modalManager.updateProgress(5, 'Preparing selection');
+
+                await this.execute(files, { pages: pagesExpr, filename });
+
+                modalManager.updateProgress(100, 'Completed');
+                window.notificationManager?.show('Pages extracted successfully!', 'success');
+            } catch (err) {
+                console.error('Split failed:', err);
+                window.notificationManager?.show(`Split failed: ${err.message}`, 'error', { persistent: true });
+            } finally {
+                modalManager.hideProgress();
+            }
+        });
+    }
+}
+/**
  * Tool Manager Class
  */
 class ToolManager {
@@ -139,7 +270,7 @@ class ToolManager {
     initializeTools() {
         // Register available tools with correct IDs matching HTML data-tool attributes
         this.registerTool('merger', new PDFMergerTool());
-        this.registerTool('splitter', new PDFMergerTool()); // Using same class for now
+        this.registerTool('splitter', new PDFSplitterTool());
         this.registerTool('pdf-to-word', new PDFMergerTool());
         this.registerTool('pdf-to-image', new PDFMergerTool());
         this.registerTool('image-to-pdf', new PDFMergerTool());

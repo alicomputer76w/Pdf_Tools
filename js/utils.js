@@ -164,7 +164,8 @@ class PDFUtils {
      * @returns {Promise<PDFLib.PDFDocument>} - New PDF with extracted pages
      */
     static async extractPages(sourcePdf, pageNumbers) {
-        const newPdf = window.PDFLib.PDFDocument.create();
+        // PDFLib.PDFDocument.create() returns a Promise, so we must await it
+        const newPdf = await window.PDFLib.PDFDocument.create();
         const pages = await newPdf.copyPages(sourcePdf, pageNumbers);
         
         pages.forEach(page => newPdf.addPage(page));
