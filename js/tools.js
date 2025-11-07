@@ -327,17 +327,89 @@ class ImageToPDFTool extends BaseTool {
         }
         const doc = await window.PDFLib.PDFDocument.create();
 
-        for (const file of files) {
-            const arrayBuffer = await file.arrayBuffer();
-            let embedded;
-            if ((file.type || '').toLowerCase().includes('png')) {
-                embedded = await doc.embedPng(arrayBuffer);
-            } else {
-                embedded = await doc.embedJpg(arrayBuffer);
+        // Cap very large images to avoid memory issues. You can tweak this if needed.
+        const MAX_DIM = 4000; // max width/height in pixels
+
+        async function loadBitmapWithOrientation(blob) {
+            // Prefer createImageBitmap to respect EXIF orientation where supported
+            if (window.createImageBitmap) {
+                try {
+                    return await createImageBitmap(blob, { imageOrientation: 'from-image' });
+                } catch (e) {
+                    // Fallback below
+                }
             }
-            const { width, height } = embedded.scale(1);
-            const page = doc.addPage([width, height]);
-            page.drawImage(embedded, { x: 0, y: 0, width, height });
+            return null;
+        }
+
+        async function drawToCanvas(file) {
+            const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'application/octet-stream' });
+            // Try oriented bitmap first
+            let bitmap = await loadBitmapWithOrientation(blob);
+            if (bitmap) {
+                const scale = Math.min(1, MAX_DIM / Math.max(bitmap.width, bitmap.height));
+                const cw = Math.max(1, Math.round(bitmap.width * scale));
+                const ch = Math.max(1, Math.round(bitmap.height * scale));
+                const canvas = document.createElement('canvas');
+                canvas.width = cw; canvas.height = ch;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(bitmap, 0, 0, cw, ch);
+                return canvas;
+            }
+            // Fallback: HTMLImageElement
+            const url = URL.createObjectURL(blob);
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    image.onload = () => resolve(image);
+                    image.onerror = (err) => reject(new Error('Unsupported image or failed to load'));
+                    image.src = url;
+                });
+                const scale = Math.min(1, MAX_DIM / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+                const cw = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+                const ch = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+                const canvas = document.createElement('canvas');
+                canvas.width = cw; canvas.height = ch;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, cw, ch);
+                return canvas;
+            } finally {
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        async function canvasToJPEGBytes(canvas, quality = 0.92) {
+            const blob = await ImageUtils.canvasToBlob(canvas, 'image/jpeg', quality);
+            return new Uint8Array(await blob.arrayBuffer());
+        }
+
+        async function canvasToPNGBytes(canvas) {
+            const blob = await ImageUtils.canvasToBlob(canvas, 'image/png');
+            return new Uint8Array(await blob.arrayBuffer());
+        }
+
+        let index = 0;
+        for (const file of files) {
+            index++;
+            // Update progress for UX (non-blocking)
+            try { modalManager.updateProgress(Math.round((index / files.length) * 100), `Processing image ${index}/${files.length}`); } catch {}
+
+            // Draw to canvas (handles WebP, HEIC via browser support, and applies downscaling)
+            const canvas = await drawToCanvas(file);
+            const cw = canvas.width, ch = canvas.height;
+
+            // Prefer JPEG embedding for smaller file sizes; fallback to PNG if needed
+            let embedded = null;
+            try {
+                const jpgBytes = await canvasToJPEGBytes(canvas, 0.92);
+                embedded = await doc.embedJpg(jpgBytes);
+            } catch (e) {
+                const pngBytes = await canvasToPNGBytes(canvas);
+                embedded = await doc.embedPng(pngBytes);
+            }
+
+            const page = doc.addPage([cw, ch]);
+            page.drawImage(embedded, { x: 0, y: 0, width: cw, height: ch });
         }
 
         const pdfBytes = await doc.save();
@@ -834,7 +906,7 @@ class ToolManager {
             'pdf-to-image': 'PDFToImageTool',
             'image-to-pdf': 'ImageToPDFTool',
             'compressor': 'CompressorTool',
-            'password-protector': 'PasswordProtectorTool',
+            
             'watermark': 'WatermarkTool',
             'rotator': 'RotatorTool',
             'metadata': 'MetadataTool',
@@ -844,7 +916,7 @@ class ToolManager {
             'page-numbering': 'PageNumberingTool',
             'bookmark': 'BookmarkTool',
             'resizer': 'ResizerTool',
-            'color-converter': 'ColorConverterTool',
+            
             'ocr': 'OCRTool',
             'annotation': 'AnnotationTool',
             'optimizer': 'OptimizerTool'
@@ -861,7 +933,7 @@ class ToolManager {
         this.registerTool('pdf-to-image', new PDFToImageTool());
         this.registerTool('image-to-pdf', new ImageToPDFTool());
         this.registerTool('compressor', new CompressorTool());
-        this.registerTool('password-protector', new PasswordProtectorTool());
+        
         this.registerTool('watermark', new WatermarkTool());
         this.registerTool('rotator', new RotatorTool());
         this.registerTool('metadata', new MetadataTool());
@@ -871,7 +943,7 @@ class ToolManager {
         this.registerTool('page-numbering', new PageNumberingTool());
         this.registerTool('bookmark', new BookmarkTool());
         this.registerTool('resizer', new ResizerTool());
-        this.registerTool('color-converter', new ColorConverterTool());
+        
         this.registerTool('ocr', new OCRTool());
         this.registerTool('annotation', new AnnotationTool());
         this.registerTool('optimizer', new OptimizerTool());
@@ -1126,108 +1198,7 @@ class ResizerTool extends BaseTool {
     }
 }
 
-/** Color Converter Tool - convert pages to grayscale */
-class ColorConverterTool extends BaseTool {
-    constructor() { super('Color Converter', 'Convert PDF pages to grayscale'); }
-    createInterface() {
-        return `
-            <div class="tool-interface">
-                <div class="upload-section">
-                    <label class="option-label" for="color-file">Select a PDF file:</label>
-                    <input type="file" id="color-file" accept="application/pdf" />
-                </div>
-                <div class="tool-options">
-                    <div class="option-group">
-                        <label class="option-label">Mode:</label>
-                        <select class="option-input" id="color-mode">
-                            <option value="grayscale">Grayscale</option>
-                            <option value="sepia">Sepia</option>
-                            <option value="invert">Invert</option>
-                            <option value="desaturate">Desaturate</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="color-process">
-                        <i class="material-icons">palette</i>
-                        <span>Convert</span>
-                    </button>
-                </div>
-            </div>`;
-    }
-    async execute(files, options = {}) {
-        if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
-        const file = files[0];
-        const data = await file.arrayBuffer();
-        const pdf = await window.pdfjsLib.getDocument({ data }).promise;
-        const doc = await window.PDFLib.PDFDocument.create();
-        const mode = (options.mode || 'grayscale').toLowerCase();
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 1 });
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = viewport.width; canvas.height = viewport.height;
-            await page.render({ canvasContext: ctx, viewport }).promise;
-            // Color conversion
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const dataArr = imgData.data;
-            for (let p = 0; p < dataArr.length; p += 4) {
-                const r = dataArr[p], g = dataArr[p + 1], b = dataArr[p + 2];
-                let nr = r, ng = g, nb = b;
-                switch (mode) {
-                    case 'grayscale': {
-                        const y = 0.299 * r + 0.587 * g + 0.114 * b;
-                        nr = ng = nb = y;
-                        break;
-                    }
-                    case 'sepia': {
-                        nr = Math.min(255, 0.393 * r + 0.769 * g + 0.189 * b);
-                        ng = Math.min(255, 0.349 * r + 0.686 * g + 0.168 * b);
-                        nb = Math.min(255, 0.272 * r + 0.534 * g + 0.131 * b);
-                        break;
-                    }
-                    case 'invert': {
-                        nr = 255 - r; ng = 255 - g; nb = 255 - b;
-                        break;
-                    }
-                    case 'desaturate': {
-                        const max = Math.max(r, g, b);
-                        const min = Math.min(r, g, b);
-                        const l = (max + min) / 2; // lightness
-                        nr = ng = nb = l;
-                        break;
-                    }
-                }
-                dataArr[p] = nr; dataArr[p + 1] = ng; dataArr[p + 2] = nb;
-            }
-            ctx.putImageData(imgData, 0, 0);
-            const blob = await ImageUtils.canvasToBlob(canvas, 'image/jpeg', 0.9);
-            const bytes = new Uint8Array(await blob.arrayBuffer());
-            const img = await doc.embedJpg(bytes);
-            const { width, height } = img.scale(1);
-            const newPage = doc.addPage([width, height]);
-            newPage.drawImage(img, { x: 0, y: 0, width, height });
-        }
-        const pdfBytes = await doc.save();
-        const suffix = mode === 'grayscale' ? 'grayscale' : (mode === 'sepia' ? 'sepia' : (mode === 'invert' ? 'inverted' : 'desaturated'));
-        const filename = `${file.name.replace(/\.pdf$/i, '')}_${suffix}.pdf`;
-        DownloadUtils.downloadPDF(pdfBytes, filename);
-        return { success: true, message: `Converted to ${suffix}` };
-    }
-    attachHandlers() {
-        const input = document.getElementById('color-file');
-        const modeSel = document.getElementById('color-mode');
-        const btn = document.getElementById('color-process');
-        btn?.addEventListener('click', async () => {
-            const files = Array.from(input?.files || []);
-            try { modalManager.showProgress('Converting Colors...', 'Processing PDF...'); await this.execute(files, { mode: modeSel?.value }); window.notificationManager?.show('Converted successfully!', 'success'); }
-            catch (err) { window.notificationManager?.show(`Color conversion failed: ${err.message}`, 'error'); }
-            finally { modalManager.hideProgress(); }
-        });
-    }
-}
+/* ColorConverterTool removed as per user request */
 
 /** Signature Tool - draw signature image onto pages */
 class SignatureTool extends BaseTool {
@@ -1541,59 +1512,7 @@ class OptimizerTool extends BaseTool {
     }
 }
 
-/** Password Protector Tool - limitation note */
-class PasswordProtectorTool extends BaseTool {
-    constructor() { super('Password Protector', 'Add password protection (limited offline capability)'); }
-    createInterface() {
-        return `
-            <div class="tool-interface">
-                <div class="upload-section">
-                    <label class="option-label" for="pwd-file">Select a PDF file:</label>
-                    <input type="file" id="pwd-file" accept="application/pdf" />
-                </div>
-                <div class="tool-options">
-                    <div class="option-group">
-                        <label class="option-label">Password:</label>
-                        <input type="password" class="option-input" id="pwd-pass" placeholder="Enter password">
-                    </div>
-                </div>
-                <p class="hint">Note: True PDF encryption is not supported in this offline tool. We will add a visible lock watermark and prompt before opening.</p>
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="pwd-process">
-                        <i class="material-icons">lock</i>
-                        <span>Protect</span>
-                    </button>
-                </div>
-            </div>`;
-    }
-    async execute(files, options = {}) {
-        if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
-        const pass = (options.password || '').trim(); if (!pass) throw new Error('Please enter a password');
-        const doc = await PDFUtils.loadPDF(files[0]);
-        const font = await doc.embedFont(window.PDFLib.StandardFonts.Helvetica);
-        const pages = doc.getPages();
-        pages.forEach(page => {
-            const { width, height } = page.getSize();
-            page.drawText('LOCKED', { x: width / 2 - 60, y: height / 2, size: 24, font, color: window.PDFLib.rgb(1, 0, 0), opacity: 0.5 });
-        });
-        const pdfBytes = await doc.save();
-        const filename = `${files[0].name.replace(/\.pdf$/i, '')}_protected.pdf`;
-        DownloadUtils.downloadPDF(pdfBytes, filename);
-        return { success: true, message: 'Password noted (visual watermark only)' };
-    }
-    attachHandlers() {
-        const input = document.getElementById('pwd-file');
-        const passInput = document.getElementById('pwd-pass');
-        const btn = document.getElementById('pwd-process');
-        btn?.addEventListener('click', async () => {
-            const files = Array.from(input?.files || []);
-            try { modalManager.showProgress('Adding Password Protection...', 'Processing PDF...'); await this.execute(files, { password: passInput?.value }); window.notificationManager?.show('Note: Visual watermark added. True encryption not supported offline.', 'info'); }
-            catch (err) { window.notificationManager?.show(`Password protection failed: ${err.message}`, 'error'); }
-            finally { modalManager.hideProgress(); }
-        });
-    }
-}
+/* PasswordProtectorTool removed as per user request */
 
 /** OCR Tool - basic OCR using Tesseract.js loaded dynamically */
 class OCRTool extends BaseTool {
@@ -1691,3 +1610,5 @@ class OCRTool extends BaseTool {
         });
     }
 }
+
+/* PDFToExcelTool removed as per user request */

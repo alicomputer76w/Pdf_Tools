@@ -84,8 +84,8 @@
 
   <script>
     // Optional backend verification endpoint. Set this to your deployed server URL to enable advanced WhatsApp number validation.
-    // Example: const WA_VERIFY_ENDPOINT = 'https://your-domain.com/api/verify-whatsapp';
-    const WA_VERIFY_ENDPOINT = '';
+    // Local development:
+    const WA_VERIFY_ENDPOINT = 'http://localhost:8080/api/verify-whatsapp';
     // Replace this with your actual WhatsApp number in international format (no '+'). Example: 923001234567
     const OWNER_WHATSAPP = '923081517640'; // Owner WhatsApp number in international format (no '+')
     // Customize incoming WhatsApp message with site identity
