@@ -388,6 +388,21 @@ class ImageToPDFTool extends BaseTool {
             return new Uint8Array(await blob.arrayBuffer());
         }
 
+        function isJPEG(bytes) {
+            // JPEG starts with 0xFF 0xD8 (SOI)
+            return bytes && bytes.length > 2 && bytes[0] === 0xFF && bytes[1] === 0xD8;
+        }
+
+        function isPNG(bytes) {
+            // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+            const sig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+            if (!bytes || bytes.length < sig.length) return false;
+            for (let i = 0; i < sig.length; i++) {
+                if (bytes[i] !== sig[i]) return false;
+            }
+            return true;
+        }
+
         let index = 0;
         for (const file of files) {
             index++;
@@ -398,14 +413,27 @@ class ImageToPDFTool extends BaseTool {
             const canvas = await drawToCanvas(file);
             const cw = canvas.width, ch = canvas.height;
 
-            // Prefer JPEG embedding for smaller file sizes; fallback to PNG if needed
+            // Prefer JPEG embedding for smaller file sizes; verify header and fallback to PNG if needed
             let embedded = null;
             try {
                 const jpgBytes = await canvasToJPEGBytes(canvas, 0.92);
-                embedded = await doc.embedJpg(jpgBytes);
+                if (isJPEG(jpgBytes)) {
+                    embedded = await doc.embedJpg(jpgBytes);
+                } else {
+                    // Fallback to PNG if JPEG SOI is not found
+                    const pngBytes = await canvasToPNGBytes(canvas);
+                    if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
+                    embedded = await doc.embedPng(pngBytes);
+                }
             } catch (e) {
-                const pngBytes = await canvasToPNGBytes(canvas);
-                embedded = await doc.embedPng(pngBytes);
+                // Final fallback: try PNG embed even if JPEG path failed
+                try {
+                    const pngBytes = await canvasToPNGBytes(canvas);
+                    if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
+                    embedded = await doc.embedPng(pngBytes);
+                } catch (e2) {
+                    throw new Error(`Unsupported or corrupt image. JPEG/PNG conversion failed: ${e2.message}`);
+                }
             }
 
             const page = doc.addPage([cw, ch]);
