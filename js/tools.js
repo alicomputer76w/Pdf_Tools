@@ -413,27 +413,14 @@ class ImageToPDFTool extends BaseTool {
             const canvas = await drawToCanvas(file);
             const cw = canvas.width, ch = canvas.height;
 
-            // Prefer JPEG embedding for smaller file sizes; verify header and fallback to PNG if needed
+            // Force PNG embedding to avoid JPEG SOI errors
             let embedded = null;
             try {
-                const jpgBytes = await canvasToJPEGBytes(canvas, 0.92);
-                if (isJPEG(jpgBytes)) {
-                    embedded = await doc.embedJpg(jpgBytes);
-                } else {
-                    // Fallback to PNG if JPEG SOI is not found
-                    const pngBytes = await canvasToPNGBytes(canvas);
-                    if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
-                    embedded = await doc.embedPng(pngBytes);
-                }
-            } catch (e) {
-                // Final fallback: try PNG embed even if JPEG path failed
-                try {
-                    const pngBytes = await canvasToPNGBytes(canvas);
-                    if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
-                    embedded = await doc.embedPng(pngBytes);
-                } catch (e2) {
-                    throw new Error(`Unsupported or corrupt image. JPEG/PNG conversion failed: ${e2.message}`);
-                }
+                const pngBytes = await canvasToPNGBytes(canvas);
+                if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
+                embedded = await doc.embedPng(pngBytes);
+            } catch (e2) {
+                throw new Error(`Image embedding failed: ${e2.message}`);
             }
 
             const page = doc.addPage([cw, ch]);
