@@ -10,7 +10,7 @@
         body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; color: #222; }
         .container { max-width: 960px; margin: 0 auto; padding: 24px; }
         .hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
-        .hero img { width: 220px; height: 220px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .hero img { width: 220px; height: 220px; object-fit: cover; border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 3px solid #eee; }
         h1 { margin: 0 0 12px; font-size: 28px; }
         .subtitle { color: #555; margin-bottom: 16px; }
         .content { line-height: 1.7; }
@@ -24,7 +24,7 @@
         <h1>About</h1>
         <div class="hero">
             <!-- Save your photo to assets/sadaqat.jpg -->
-            <img src="assets/sadaqat.jpg" alt="Profile image" />
+            <img src="assets/sadaqat.jpg" alt="Profile image" onerror="this.onerror=null;this.src='assets/avatar.svg';" />
             <div>
                 <h2 style="margin:0">Sadaqat Ali</h2>
                 <div class="subtitle">Teacher • MS Office Expert • Computer Operator • HTML & C Language</div>
