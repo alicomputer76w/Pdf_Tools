@@ -692,7 +692,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Handle service worker registration for offline functionality
-if ('serviceWorker' in navigator) {
+// Temporarily disabled to avoid stale cached JS on GitHub Pages.
+// Set ENABLE_SW to true to re-enable.
+const ENABLE_SW = false;
+if (ENABLE_SW && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         // Use a relative path so GitHub Pages serves /Pdf_Tools/sw.js instead of root /sw.js
         const swUrl = 'sw.js';
