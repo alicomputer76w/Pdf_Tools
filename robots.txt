@@ -1,11 +1,6 @@
 User-agent: *
-# Allow all core pages
-Allow: /Pdf_Tools/
-
-# Disallow internal test pages from indexing
-Disallow: /Pdf_Tools/test
-Disallow: /Pdf_Tools/test-
-Disallow: /Pdf_Tools/test_*
+# Disallow internal test pages from indexing (covers test, test-, test_*)
+Disallow: /Pdf_Tools/test*
 
 # Sitemap location for this GitHub Pages site
 Sitemap: https://alicomputer76w.github.io/Pdf_Tools/sitemap.xml
