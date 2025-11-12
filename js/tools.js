@@ -480,6 +480,25 @@ class PDFToImageTool extends BaseTool {
                         <label class="option-label">Scale:</label>
                         <input type="number" class="option-input" id="pdf2img-scale" value="1" min="0.5" max="3" step="0.1">
                     </div>
+                    <div class="option-group">
+                        <label class="option-label">Page range:</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="number" class="option-input" id="pdf2img-start" value="1" min="1" step="1" style="width:100px" placeholder="Start">
+                            <span>to</span>
+                            <input type="number" class="option-input" id="pdf2img-end" value="" min="1" step="1" style="width:120px" placeholder="End (blank = last)">
+                        </div>
+                        <p class="hint">Example: convert only pages 20 to 45, enter 20 and 45. Leave End blank to convert till the last page.</p>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Save destination:</label>
+                        <div class="option-input" style="display:flex; flex-direction:column; gap:6px;">
+                            <label style="display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" id="pdf2img-folder" checked />
+                                <span>Choose a folder once (Chrome/Edge on desktop)</span>
+                            </label>
+                            <small id="pdf2img-folder-hint" class="hint">If your browser does not support folder saving, we will download a single ZIP file with all images.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
@@ -503,8 +522,38 @@ class PDFToImageTool extends BaseTool {
         const pageCount = pdf.numPages;
         const format = options.format || 'image/png';
         const scale = parseFloat(options.scale) || 1;
+        const start = Math.max(1, parseInt(options.startPage || '1', 10));
+        const endRaw = options.endPage ? parseInt(options.endPage, 10) : pageCount;
+        const end = Math.min(pageCount, Math.max(start, endRaw));
+        const useFolder = !!options.useFolder;
 
-        for (let i = 1; i <= pageCount; i++) {
+        const canPickDirectory = typeof window.showDirectoryPicker === 'function';
+        let dirHandle = null;
+        let zip = null;
+
+        if (useFolder && canPickDirectory) {
+            dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' }).catch(() => null);
+        }
+
+        if (!dirHandle && useFolder) {
+            if (typeof window.JSZip === 'undefined') {
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => reject(new Error('Failed to load JSZip'));
+                    document.head.appendChild(s);
+                });
+            }
+            if (typeof window.JSZip === 'function') {
+                zip = new window.JSZip();
+            }
+        }
+
+        const baseName = file.name.replace(/\.pdf$/i, '');
+        let convertedCount = 0;
+
+        for (let i = start; i <= end; i++) {
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale });
             const canvas = document.createElement('canvas');
@@ -514,11 +563,35 @@ class PDFToImageTool extends BaseTool {
             await page.render({ canvasContext: ctx, viewport }).promise;
 
             const blob = await ImageUtils.canvasToBlob(canvas, format, format === 'image/jpeg' ? 0.92 : 1);
-            const filename = `${file.name.replace(/\.pdf$/i, '')}_page_${i}.${format === 'image/png' ? 'png' : 'jpg'}`;
-            DownloadUtils.downloadImage(blob, filename);
+            const filename = `${baseName}_page_${i}.${format === 'image/png' ? 'png' : 'jpg'}`;
+
+            if (dirHandle) {
+                try {
+                    const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                } catch (e) {
+                    console.warn('Folder save failed, falling back to download:', e);
+                    DownloadUtils.downloadImage(blob, filename);
+                }
+            } else if (zip) {
+                const arrayBuf = await blob.arrayBuffer();
+                zip.file(filename, arrayBuf);
+            } else {
+                DownloadUtils.downloadImage(blob, filename);
+            }
+
+            convertedCount++;
         }
 
-        return { success: true, message: `Converted ${pageCount} page(s) to images` };
+        if (zip) {
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const zipName = `${baseName}_${start}-${end}_images.zip`;
+            DownloadUtils.downloadBlob(zipBlob, zipName);
+        }
+
+        return { success: true, message: `Converted ${convertedCount} page(s) to images` };
     }
 
     attachHandlers() {
@@ -526,11 +599,26 @@ class PDFToImageTool extends BaseTool {
         const fmt = document.getElementById('pdf2img-format');
         const scaleInput = document.getElementById('pdf2img-scale');
         const btn = document.getElementById('pdf2img-process');
+        const startInput = document.getElementById('pdf2img-start');
+        const endInput = document.getElementById('pdf2img-end');
+        const folderCheckbox = document.getElementById('pdf2img-folder');
+        const folderHint = document.getElementById('pdf2img-folder-hint');
+
+        if (typeof window.showDirectoryPicker !== 'function') {
+            folderHint.textContent = 'Folder saving is not supported in this browser. We will download a single ZIP with all images.';
+        }
+
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Converting to Images...', 'Rendering pages...');
-                await this.execute(files, { format: fmt?.value, scale: scaleInput?.value });
+                await this.execute(files, {
+                    format: fmt?.value,
+                    scale: scaleInput?.value,
+                    startPage: startInput?.value,
+                    endPage: endInput?.value,
+                    useFolder: folderCheckbox?.checked
+                });
                 window.notificationManager?.show('Converted to images successfully!', 'success');
             } catch (err) {
                 console.error('PDF to Image failed:', err);
