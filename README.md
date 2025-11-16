@@ -1,27 +1,31 @@
-# PDF Tools Suite (Frontend-Only)
+# PDF Tools Suite (Frontend‑Only)
 
 Live site: https://pdfescape.online/
 
-This is a pure client‑side PDF tools collection built for GitHub Pages. It requires no backend, no Node.js server, and no `node_modules`. All functionality runs in the browser using CDN libraries.
+## About
 
-## What’s included
+PDF Tools Suite is a privacy‑friendly, client‑side toolkit for everyday PDF tasks. All processing happens locally in your browser — your files do not leave your device. The app is built with `pdf-lib`, `PDF.js`, and vanilla HTML/CSS/JS, and is deployed as a static site.
 
-- Merge PDF
-- Split PDF
-- Rotate pages
-- Watermark
-- Text extractor
-- PDF to Image
-- Image to PDF (robust PNG embedding)
-- Metadata viewer/editor
-- Form filler
-- Signature
-- Page numbering
-- Bookmark
-- Resizer
-- Annotation
-- Optimizer
-- OCR (optional – client‑side; may be disabled depending on build)
+## Features Overview
+
+- PDF Merger — combine multiple PDFs into one document
+- PDF Splitter — extract specific pages or ranges into a new PDF
+- PDF to Word — convert PDF text to editable DOCX (English & Urdu)
+- PDF to Image — render pages to high‑quality images (PNG/JPG)
+- Image to PDF — create PDFs from images with robust PNG embedding
+- Watermark Adder — add text or image watermarks to pages
+- Page Rotator — fix orientation by rotating selected pages
+- Metadata Editor — view and edit title, author, and other properties
+- Form Filler — fill and edit PDF form fields
+- Digital Signature — add signature images to documents
+- Text Extractor — extract text content from PDF pages
+- Page Numbering — add customizable page numbers
+- Bookmark Manager — add and manage document bookmarks
+- Page Resizer — change page dimensions to common sizes
+- OCR Tool — extract text from scanned documents (client‑side)
+- Annotation Tool — add comments and notes to pages
+- Quality Optimizer — balance size and quality for better performance
+- Compressor — reduce file size while maintaining quality
 
 ## Removed features (as requested)
 
@@ -63,8 +67,8 @@ For more reliable local testing, you can serve the folder with any simple HTTP s
 
 ## Sitemap / SEO
 
-- `sitemap.xml` lists only the existing homepage URL.
-- `robots.txt` allows indexing of the project path and points to the sitemap.
+- `sitemap.xml` lists the live pages (home, about, feedback, policy).
+- `robots.txt` allows indexing and points search engines to the sitemap.
 
 ## Project structure
 
