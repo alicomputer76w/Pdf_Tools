@@ -14,15 +14,35 @@
     <link rel="stylesheet" href="css/styles.css" />
     <style>
         body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; color: #222; }
-        .container { max-width: 960px; margin: 0 auto; padding: 24px; }
-        .hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
-        .hero img { width: 220px; height: 220px; object-fit: cover; border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 3px solid #eee; }
-        h1 { margin: 0 0 12px; font-size: 28px; }
-        .subtitle { color: #555; margin-bottom: 16px; }
-        .content { line-height: 1.7; }
-        .badge { display: inline-block; background: #eef3ff; color: #2859ff; padding: 6px 10px; border-radius: 999px; font-size: 12px; margin-right: 6px; }
-        footer { margin-top: 40px; padding: 16px; text-align: center; color: #555; font-size: 14px; }
-        a { color: #2859ff; text-decoration: none; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+        .about-hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center; padding: 48px 24px; border-radius: 20px; background: linear-gradient(135deg, #f7f9ff 0%, #eef3ff 100%); }
+        .about-hero h1 { font-size: 36px; margin: 0 0 12px; }
+        .about-hero p { color: #555; font-size: 16px; }
+        .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+        .badge { display: inline-block; background: #eef3ff; color: #2859ff; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+        .hero-img { width: 280px; height: 280px; object-fit: cover; border-radius: 24px; box-shadow: 0 12px 30px rgba(40, 89, 255, 0.15); border: 4px solid #fff; justify-self: center; }
+        .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
+        .about-card { border: 1px solid #eee; border-radius: 16px; padding: 18px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .about-card h3 { margin: 0 0 6px; font-size: 18px; }
+        .about-card p { margin: 0; color: #666; font-size: 14px; }
+        .stats-band { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 22px; border-radius: 14px; background: #0b5ff3; color: #fff; margin-top: 36px; }
+        .stat { text-align: center; }
+        .stat .num { font-size: 28px; font-weight: 700; }
+        .stat .label { font-size: 12px; opacity: 0.9; }
+        .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
+        .value { border: 1px solid #eee; border-radius: 14px; padding: 18px; background: #fff; }
+        .value h4 { margin: 0 0 8px; font-size: 16px; }
+        .value p { margin: 0; color: #666; font-size: 14px; }
+        .cta-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 36px; padding: 20px; border-radius: 14px; background: #f5faff; border: 1px solid #e6f0ff; }
+        .cta-banner .cta-text { color: #333; }
+        .cta-btn { display: inline-flex; align-items: center; gap: 8px; background: #2859ff; color: #fff; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+        .footer { margin-top: 40px; padding: 16px; text-align: center; color: #555; font-size: 14px; }
+        @media (max-width: 900px) {
+            .about-hero { grid-template-columns: 1fr; text-align: center; }
+            .about-grid { grid-template-columns: 1fr 1fr; }
+            .values { grid-template-columns: 1fr; }
+            .stats-band { grid-template-columns: 1fr 1fr; }
+        }
     </style>
     <!-- Canonical URL for SEO -->
     <link rel="canonical" href="https://pdfescape.online/about.html" />
@@ -56,37 +76,77 @@
     </header>
 
     <div class="container">
-        <h1>About</h1>
-        <div class="hero">
-            <!-- Save your photo to assets/sadaqat.jpg -->
-            <img src="assets/sadaqat.jpg" alt="Profile image" onerror="this.onerror=null;this.src='assets/avatar.svg';" />
+        <section class="about-hero">
             <div>
-                <h2 style="margin:0">Sadaqat Ali</h2>
-                <div class="subtitle">Teacher • MS Office Expert • Computer Operator • HTML & C Language</div>
-                <div>
-                    <span class="badge">Teaching</span>
-                    <span class="badge">MS Office</span>
-                    <span class="badge">HTML</span>
-                    <span class="badge">C Language</span>
+                <h1>About PDF Tools Suite</h1>
+                <p>Privacy‑friendly, client‑side toolkit for everyday PDF tasks. Fast, simple, and secure — all processing happens locally in your browser.</p>
+                <div class="hero-badges">
+                    <span class="badge">20+ Tools</span>
+                    <span class="badge">100% Client‑Side</span>
+                    <span class="badge">No Uploads</span>
+                    <span class="badge">Free to Use</span>
                 </div>
             </div>
-        </div>
+            <img class="hero-img" src="assets/sadaqat.jpg" alt="Profile image" onerror="this.onerror=null;this.src='assets/avatar.svg';" />
+        </section>
 
-        <div class="content" style="margin-top:20px;">
-            <p>
-                I am a dedicated teacher and technology enthusiast with strong expertise in Microsoft Office, computer operations, and core programming fundamentals. I focus on building practical skills—creating efficient workflows, clean documents, and reliable solutions. My work style is organized, detail‑oriented, and student‑friendly, with emphasis on clarity and consistency.
-            </p>
-            <p>
-                On the programming side, I work with HTML for clean, semantic web pages and C language for solid foundational understanding of logic and structures. I enjoy explaining complex concepts in simple terms and turning ideas into well‑structured, usable results.
-            </p>
-            <p>
-                Mail: we9191711@gmail.com
-            </p>
-        </div>
+        <section class="about-grid">
+            <div class="about-card">
+                <h3>Merge & Split</h3>
+                <p>Combine files or extract specific pages into clean PDFs.</p>
+            </div>
+            <div class="about-card">
+                <h3>Convert & Export</h3>
+                <p>PDF ⇄ Image, PDF → Word (English & Urdu), fast downloads.</p>
+            </div>
+            <div class="about-card">
+                <h3>Edit & Organize</h3>
+                <p>Watermark, rotate, metadata, bookmarks, annotations.</p>
+            </div>
+            <div class="about-card">
+                <h3>Forms & Signature</h3>
+                <p>Fill forms and add secure signatures to documents.</p>
+            </div>
+            <div class="about-card">
+                <h3>Optimize & Compress</h3>
+                <p>Balance quality and size with smart compression.</p>
+            </div>
+            <div class="about-card">
+                <h3>OCR & Text</h3>
+                <p>Extract text from scanned PDFs and pages.</p>
+            </div>
+        </section>
 
-        <footer>
-            Developed by Sadaqat Ali
-        </footer>
+        <section class="stats-band">
+            <div class="stat"><div class="num">20+</div><div class="label">Tools</div></div>
+            <div class="stat"><div class="num">100%</div><div class="label">Client‑Side</div></div>
+            <div class="stat"><div class="num">0</div><div class="label">Uploads</div></div>
+        </section>
+
+        <section class="values">
+            <div class="value">
+                <h4>Privacy First</h4>
+                <p>Your files never leave your device. Processing is local.</p>
+            </div>
+            <div class="value">
+                <h4>Simple by Design</h4>
+                <p>Clean UI with clear steps — open, process, download.</p>
+            </div>
+            <div class="value">
+                <h4>Fast & Reliable</h4>
+                <p>CDN libraries and optimized workflows for speed.</p>
+            </div>
+        </section>
+
+        <section class="cta-banner">
+            <div class="cta-text">
+                <strong>Ready to get started?</strong>
+                <div>Open the tools and try them free on your browser.</div>
+            </div>
+            <a class="cta-btn" href="index.html">Open Tools</a>
+        </section>
+
+        <div class="footer">© 2025 • PDF Tools Suite</div>
     </div>
 </body>
 </html>
