@@ -49,6 +49,10 @@
       (function(){
         var h=location.hostname;
         if(h.indexOf('github.io')!==-1){
+          var m=document.createElement('meta');
+          m.name='robots';
+          m.content='noindex,follow';
+          document.head.appendChild(m);
           var p=location.pathname.replace(/^\/Pdf_Tools/,'');
           var u='https://pdfescape.online'+p+location.search+location.hash;
           location.replace(u);
