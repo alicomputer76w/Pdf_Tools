@@ -1113,12 +1113,18 @@ class WatermarkTool extends BaseTool {
                 hDraw *= fitScale;
                 bw = Math.abs(wDraw * cos) + Math.abs(hDraw * sin);
                 bh = Math.abs(wDraw * sin) + Math.abs(hDraw * cos);
-                const cx = (width - bw) / 2;
-                const cy = (height - bh) / 2 + (hDraw * 0.5);
-                const drawImageOnce = (dx, dy) => {
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const anchorForCenter = (cx, cy) => {
+                    const dx = (wDraw / 2) * cos - (hDraw / 2) * sin;
+                    const dy = (wDraw / 2) * sin + (hDraw / 2) * cos;
+                    return { x: cx - dx, y: cy - dy };
+                };
+                const drawAtCenter = (cx, cy) => {
+                    const a = anchorForCenter(cx, cy);
                     page.drawImage(imageRef, {
-                        x: dx,
-                        y: dy,
+                        x: a.x,
+                        y: a.y,
                         width: wDraw,
                         height: hDraw,
                         rotate: window.PDFLib.degrees(angle),
@@ -1126,13 +1132,13 @@ class WatermarkTool extends BaseTool {
                     });
                 };
                 if (!tile) {
-                    drawImageOnce(cx, cy);
+                    drawAtCenter(centerX, centerY);
                 } else {
                     const stepX = width / 2;
                     const stepY = height / 2;
                     for (let ix = -1; ix <= 1; ix++) {
                         for (let iy = -1; iy <= 1; iy++) {
-                            drawImageOnce(cx + ix * stepX, cy + iy * stepY);
+                            drawAtCenter(centerX + ix * stepX, centerY + iy * stepY);
                         }
                     }
                 }
