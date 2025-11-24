@@ -1053,9 +1053,29 @@ class WatermarkTool extends BaseTool {
                 const target = diag * 0.9;
                 size = Math.min(400, Math.max(12, target / perUnit));
             }
-            const textWidth = font.widthOfTextAtSize(text, size);
-            const x = (width - textWidth) / 2;
-            const y = height / 2;
+            const w = font.widthOfTextAtSize(text, size);
+            const h = font.heightAtSize(size);
+            const rad = (angle * Math.PI) / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+            let bw = Math.abs(w * cos) + Math.abs(h * sin);
+            let bh = Math.abs(w * sin) + Math.abs(h * cos);
+
+            if (!autoFit) {
+                const scaleW = width * 0.95 / bw;
+                const scaleH = height * 0.95 / bh;
+                const scale = Math.min(1, Math.min(scaleW, scaleH));
+                if (scale < 1) {
+                    size = size * scale;
+                    const w2 = font.widthOfTextAtSize(text, size);
+                    const h2 = font.heightAtSize(size);
+                    bw = Math.abs(w2 * cos) + Math.abs(h2 * sin);
+                    bh = Math.abs(w2 * sin) + Math.abs(h2 * cos);
+                }
+            }
+
+            const x = (width - bw) / 2;
+            const y = (height - bh) / 2 + (font.heightAtSize(size) * 0.5);
             page.drawText(text, {
                 x,
                 y,
