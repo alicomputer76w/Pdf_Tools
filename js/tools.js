@@ -787,6 +787,22 @@ class PageNumberingTool extends BaseTool {
                         <label class="option-label">Font size:</label>
                         <input type="number" class="option-input" id="pagenum-size" value="12" min="8" max="36">
                     </div>
+                    <div class="option-group">
+                        <label class="option-label">Numbering format:</label>
+                        <select class="option-input" id="pagenum-format">
+                            <option value="arabic" selected>Arabic (1, 2, 3)</option>
+                            <option value="roman">Roman (I, II, III)</option>
+                            <option value="words">Words (one, two, three)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Color:</label>
+                        <input type="color" class="option-input" id="pagenum-color" value="#000000">
+                    </div>
+                    <div class="option-group" style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="pagenum-underline">
+                        <label class="option-label" for="pagenum-underline">Underline</label>
+                    </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
@@ -804,19 +820,67 @@ class PageNumberingTool extends BaseTool {
         const file = files[0];
         const doc = await PDFUtils.loadPDF(file);
         const fontSize = parseInt(options.fontSize, 10) || 12;
+        const format = options.format || 'arabic';
+        const colorHex = options.color || '#000000';
+        const underline = !!options.underline;
+        const hexToRgb = (hex) => {
+            const h = hex.replace('#', '');
+            const int = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+            const r = (int >> 16) & 255;
+            const g = (int >> 8) & 255;
+            const b = int & 255;
+            return window.PDFLib.rgb(r/255, g/255, b/255);
+        };
+        const toRoman = (num) => {
+            const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+            const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+            let n = num; let out = '';
+            for (let i=0;i<vals.length;i++){ while(n>=vals[i]){ out += syms[i]; n -= vals[i]; } }
+            return out;
+        };
+        const toWords = (num) => {
+            const ones = ['zero','one','two','three','four','five','six','seven','eight','nine'];
+            const teens = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+            const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+            const chunk = (n) => {
+                let s = '';
+                const h = Math.floor(n/100); const t = n%100; const o = n%10;
+                if (h) s += ones[h] + ' hundred';
+                if (t){ if (h) s += ' ';
+                    if (t<10) s += ones[t]; else if (t<20) s += teens[t-10]; else { s += tens[Math.floor(t/10)]; if (o) s += '-' + ones[o]; }
+                }
+                return s || 'zero';
+            };
+            if (num===0) return 'zero';
+            const thousands = Math.floor(num/1000); const rest = num%1000;
+            let out = '';
+            if (thousands) out += chunk(thousands) + ' thousand';
+            if (rest){ if (thousands) out += ' '; out += chunk(rest); }
+            return out;
+        };
         const helv = await doc.embedFont(window.PDFLib.StandardFonts.Helvetica);
         const pages = doc.getPages();
         pages.forEach((page, idx) => {
             const { width } = page.getSize();
-            const text = String(idx + 1);
+            const n = idx + 1;
+            let text = '';
+            if (format === 'roman') text = toRoman(n);
+            else if (format === 'words') text = toWords(n);
+            else text = String(n);
             const textWidth = helv.widthOfTextAtSize(text, fontSize);
+            const x = (width - textWidth) / 2;
+            const y = 24;
             page.drawText(text, {
-                x: (width - textWidth) / 2,
-                y: 24,
+                x,
+                y,
                 size: fontSize,
                 font: helv,
-                color: window.PDFLib.rgb(0, 0, 0)
+                color: hexToRgb(colorHex)
             });
+            if (underline) {
+                const thickness = Math.max(0.75, fontSize * 0.05);
+                page.drawRectangle({ x, y: y - thickness - 2, width: textWidth, height: thickness, color: hexToRgb(colorHex) });
+            }
         });
         const pdfBytes = await doc.save();
         const filename = `${file.name.replace(/\.pdf$/i, '')}_numbered.pdf`;
@@ -827,12 +891,20 @@ class PageNumberingTool extends BaseTool {
     attachHandlers() {
         const input = document.getElementById('pagenum-file');
         const sizeInput = document.getElementById('pagenum-size');
+        const formatSel = document.getElementById('pagenum-format');
+        const colorInput = document.getElementById('pagenum-color');
+        const underlineInput = document.getElementById('pagenum-underline');
         const btn = document.getElementById('pagenum-process');
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Adding Page Numbers...', 'Processing PDF pages...');
-                await this.execute(files, { fontSize: sizeInput?.value });
+                await this.execute(files, {
+                    fontSize: sizeInput?.value,
+                    format: formatSel?.value,
+                    color: colorInput?.value,
+                    underline: underlineInput?.checked
+                });
                 window.notificationManager?.show('Page numbers added successfully!', 'success');
             } catch (err) {
                 console.error('Page numbering failed:', err);
