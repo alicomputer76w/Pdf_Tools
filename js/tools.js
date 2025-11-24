@@ -1009,6 +1009,18 @@ class WatermarkTool extends BaseTool {
                         <label class="option-label">Opacity (0.1 - 1):</label>
                         <input type="number" class="option-input" id="watermark-opacity" value="0.2" min="0.1" max="1" step="0.1">
                     </div>
+                    <div class="option-group">
+                        <label class="option-label">Angle (degrees):</label>
+                        <input type="number" class="option-input" id="watermark-angle" value="45" min="0" max="90" step="1">
+                    </div>
+                    <div class="option-group" style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="watermark-autofit" checked>
+                        <label class="option-label" for="watermark-autofit">Auto‑fit across page diagonal</label>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Font size (when auto‑fit is off):</label>
+                        <input type="number" class="option-input" id="watermark-size" value="72" min="12" max="400">
+                    </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
@@ -1027,16 +1039,29 @@ class WatermarkTool extends BaseTool {
         const doc = await PDFUtils.loadPDF(file);
         const text = (options.text || 'CONFIDENTIAL').trim();
         const opacity = Math.min(1, Math.max(0.1, parseFloat(options.opacity) || 0.2));
+        const angle = Math.min(90, Math.max(0, parseFloat(options.angle) || 45));
+        const autoFit = !!options.autofit;
+        const manualSize = Math.min(400, Math.max(12, parseInt(options.size, 10) || 72));
         const font = await doc.embedFont(window.PDFLib.StandardFonts.Helvetica);
         const pages = doc.getPages();
         pages.forEach((page) => {
             const { width, height } = page.getSize();
+            let size = manualSize;
+            if (autoFit) {
+                const diag = Math.sqrt(width * width + height * height);
+                const perUnit = font.widthOfTextAtSize(text, 1);
+                const target = diag * 0.9;
+                size = Math.min(400, Math.max(12, target / perUnit));
+            }
+            const textWidth = font.widthOfTextAtSize(text, size);
+            const x = (width - textWidth) / 2;
+            const y = height / 2;
             page.drawText(text, {
-                x: width / 4,
-                y: height / 2,
-                size: 36,
+                x,
+                y,
+                size,
                 font,
-                rotate: window.PDFLib.degrees(45),
+                rotate: window.PDFLib.degrees(angle),
                 color: window.PDFLib.rgb(1, 0, 0),
                 opacity
             });
@@ -1051,12 +1076,21 @@ class WatermarkTool extends BaseTool {
         const input = document.getElementById('watermark-file');
         const textInput = document.getElementById('watermark-text');
         const opacityInput = document.getElementById('watermark-opacity');
+        const angleInput = document.getElementById('watermark-angle');
+        const autoFitInput = document.getElementById('watermark-autofit');
+        const sizeInput = document.getElementById('watermark-size');
         const btn = document.getElementById('watermark-process');
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Adding Watermark...', 'Processing PDF...');
-                await this.execute(files, { text: textInput?.value, opacity: opacityInput?.value });
+                await this.execute(files, {
+                    text: textInput?.value,
+                    opacity: opacityInput?.value,
+                    angle: angleInput?.value,
+                    autofit: autoFitInput?.checked,
+                    size: sizeInput?.value
+                });
                 window.notificationManager?.show('Watermark added successfully!', 'success');
             } catch (err) {
                 console.error('Watermark failed:', err);
