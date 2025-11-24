@@ -1002,6 +1002,17 @@ class WatermarkTool extends BaseTool {
                 </div>
                 <div class="tool-options">
                     <div class="option-group">
+                        <label class="option-label">Watermark type:</label>
+                        <select class="option-input" id="watermark-type">
+                            <option value="text" selected>Text</option>
+                            <option value="image">Image</option>
+                        </select>
+                    </div>
+                    <div class="upload-section">
+                        <label class="option-label" for="watermark-image">Upload watermark image (PNG/JPG):</label>
+                        <input type="file" id="watermark-image" accept="image/*" />
+                    </div>
+                    <div class="option-group">
                         <label class="option-label">Watermark Text:</label>
                         <input type="text" class="option-input" id="watermark-text" placeholder="CONFIDENTIAL">
                     </div>
@@ -1013,13 +1024,33 @@ class WatermarkTool extends BaseTool {
                         <label class="option-label">Angle (degrees):</label>
                         <input type="number" class="option-input" id="watermark-angle" value="45" min="0" max="90" step="1">
                     </div>
-                    <div class="option-group" style="display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="watermark-autofit" checked>
-                        <label class="option-label" for="watermark-autofit">Auto‑fit across page diagonal</label>
-                    </div>
                     <div class="option-group">
                         <label class="option-label">Font size (when auto‑fit is off):</label>
                         <input type="number" class="option-input" id="watermark-size" value="72" min="12" max="400">
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Color:</label>
+                        <input type="color" class="option-input" id="watermark-color" value="#FF0000">
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Font:</label>
+                        <select class="option-input" id="watermark-font">
+                            <option value="Helvetica" selected>Helvetica</option>
+                            <option value="TimesRoman">Times</option>
+                            <option value="Courier">Courier</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Image scale (fraction of page width):</label>
+                        <input type="number" class="option-input" id="watermark-scale" value="0.6" min="0.1" max="1" step="0.05">
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Pages (e.g., 1-3,5):</label>
+                        <input type="text" class="option-input" id="watermark-pages" placeholder="all">
+                    </div>
+                    <div class="option-group" style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="watermark-tile">
+                        <label class="option-label" for="watermark-tile">Tile across page</label>
                     </div>
                 </div>
                 <div class="action-buttons">
@@ -1037,54 +1068,113 @@ class WatermarkTool extends BaseTool {
         if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
         const file = files[0];
         const doc = await PDFUtils.loadPDF(file);
+        const type = options.type || 'text';
         const text = (options.text || 'CONFIDENTIAL').trim();
         const opacity = Math.min(1, Math.max(0.1, parseFloat(options.opacity) || 0.2));
         const angle = Math.min(90, Math.max(0, parseFloat(options.angle) || 45));
-        const autoFit = !!options.autofit;
         const manualSize = Math.min(400, Math.max(12, parseInt(options.size, 10) || 72));
-        const font = await doc.embedFont(window.PDFLib.StandardFonts.Helvetica);
+        const colorHex = options.color || '#FF0000';
+        const fontName = options.font || 'Helvetica';
+        const tile = !!options.tile;
+        const pageExpr = options.pages || '';
+        const hexToRgb = (hex) => {
+            const h = hex.replace('#', '');
+            const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+            const i = parseInt(v, 16);
+            const r = (i >> 16) & 255, g = (i >> 8) & 255, b = i & 255;
+            return window.PDFLib.rgb(r/255, g/255, b/255);
+        };
+        const fontRef = await doc.embedFont(window.PDFLib.StandardFonts[fontName] || window.PDFLib.StandardFonts.Helvetica);
+        let imageRef = null;
+        let imageScale = Math.min(1, Math.max(0.1, parseFloat(options.scale) || 0.6));
+        if (type === 'image') {
+            const imgFile = options.imageFile;
+            if (!imgFile) throw new Error('Upload a watermark image');
+            const imgBytes = await imgFile.arrayBuffer();
+            const isPng = /png$/i.test(imgFile.type) || imgFile.name.toLowerCase().endsWith('.png');
+            imageRef = isPng ? await doc.embedPng(imgBytes) : await doc.embedJpg(imgBytes);
+        }
         const pages = doc.getPages();
-        pages.forEach((page) => {
+        const selected = pageExpr ? parsePagesExpression(pageExpr, pages.length) : pages.map((_, i) => i);
+        pages.forEach((page, pageIndex) => {
+            if (!selected.includes(pageIndex)) return;
             const { width, height } = page.getSize();
-            let size = manualSize;
-            if (autoFit) {
-                const diag = Math.sqrt(width * width + height * height);
-                const perUnit = font.widthOfTextAtSize(text, 1);
-                const target = diag * 0.9;
-                size = Math.min(400, Math.max(12, target / perUnit));
-            }
-            const w = font.widthOfTextAtSize(text, size);
-            const h = font.heightAtSize(size);
             const rad = (angle * Math.PI) / 180;
             const cos = Math.cos(rad);
             const sin = Math.sin(rad);
-            let bw = Math.abs(w * cos) + Math.abs(h * sin);
-            let bh = Math.abs(w * sin) + Math.abs(h * cos);
-
-            if (!autoFit) {
-                const scaleW = width * 0.95 / bw;
-                const scaleH = height * 0.95 / bh;
-                const scale = Math.min(1, Math.min(scaleW, scaleH));
-                if (scale < 1) {
-                    size = size * scale;
-                    const w2 = font.widthOfTextAtSize(text, size);
-                    const h2 = font.heightAtSize(size);
-                    bw = Math.abs(w2 * cos) + Math.abs(h2 * sin);
-                    bh = Math.abs(w2 * sin) + Math.abs(h2 * cos);
+            if (type === 'image') {
+                let wDraw = width * imageScale;
+                const aspect = imageRef.height / imageRef.width;
+                let hDraw = wDraw * aspect;
+                let bw = Math.abs(wDraw * cos) + Math.abs(hDraw * sin);
+                let bh = Math.abs(wDraw * sin) + Math.abs(hDraw * cos);
+                const fitScale = Math.min(1, Math.min((width * 0.95) / bw, (height * 0.95) / bh));
+                wDraw *= fitScale;
+                hDraw *= fitScale;
+                bw = Math.abs(wDraw * cos) + Math.abs(hDraw * sin);
+                bh = Math.abs(wDraw * sin) + Math.abs(hDraw * cos);
+                const cx = (width - bw) / 2;
+                const cy = (height - bh) / 2 + (hDraw * 0.5);
+                const drawImageOnce = (dx, dy) => {
+                    page.drawImage(imageRef, {
+                        x: dx,
+                        y: dy,
+                        width: wDraw,
+                        height: hDraw,
+                        rotate: window.PDFLib.degrees(angle),
+                        opacity
+                    });
+                };
+                if (!tile) {
+                    drawImageOnce(cx, cy);
+                } else {
+                    const stepX = width / 2;
+                    const stepY = height / 2;
+                    for (let ix = -1; ix <= 1; ix++) {
+                        for (let iy = -1; iy <= 1; iy++) {
+                            drawImageOnce(cx + ix * stepX, cy + iy * stepY);
+                        }
+                    }
+                }
+            } else {
+                let size = manualSize;
+                let wText = fontRef.widthOfTextAtSize(text, size);
+                let hText = fontRef.heightAtSize(size);
+                let bw = Math.abs(wText * cos) + Math.abs(hText * sin);
+                let bh = Math.abs(wText * sin) + Math.abs(hText * cos);
+                const fitScale = Math.min(1, Math.min(width * 0.95 / bw, height * 0.95 / bh));
+                if (fitScale < 1) {
+                    size = size * fitScale;
+                    wText = fontRef.widthOfTextAtSize(text, size);
+                    hText = fontRef.heightAtSize(size);
+                    bw = Math.abs(wText * cos) + Math.abs(hText * sin);
+                    bh = Math.abs(wText * sin) + Math.abs(hText * cos);
+                }
+                const cx = (width - bw) / 2;
+                const cy = (height - bh) / 2 + (fontRef.heightAtSize(size) * 0.5);
+                const drawTextOnce = (dx, dy) => {
+                    page.drawText(text, {
+                        x: dx,
+                        y: dy,
+                        size,
+                        font: fontRef,
+                        rotate: window.PDFLib.degrees(angle),
+                        color: hexToRgb(colorHex),
+                        opacity
+                    });
+                };
+                if (!tile) {
+                    drawTextOnce(cx, cy);
+                } else {
+                    const stepX = width / 2;
+                    const stepY = height / 2;
+                    for (let ix = -1; ix <= 1; ix++) {
+                        for (let iy = -1; iy <= 1; iy++) {
+                            drawTextOnce(cx + ix * stepX, cy + iy * stepY);
+                        }
+                    }
                 }
             }
-
-            const x = (width - bw) / 2;
-            const y = (height - bh) / 2 + (font.heightAtSize(size) * 0.5);
-            page.drawText(text, {
-                x,
-                y,
-                size,
-                font,
-                rotate: window.PDFLib.degrees(angle),
-                color: window.PDFLib.rgb(1, 0, 0),
-                opacity
-            });
         });
         const pdfBytes = await doc.save();
         const filename = `${file.name.replace(/\.pdf$/i, '')}_watermarked.pdf`;
@@ -1094,22 +1184,35 @@ class WatermarkTool extends BaseTool {
 
     attachHandlers() {
         const input = document.getElementById('watermark-file');
+        const typeSel = document.getElementById('watermark-type');
+        const imageInput = document.getElementById('watermark-image');
         const textInput = document.getElementById('watermark-text');
         const opacityInput = document.getElementById('watermark-opacity');
         const angleInput = document.getElementById('watermark-angle');
-        const autoFitInput = document.getElementById('watermark-autofit');
         const sizeInput = document.getElementById('watermark-size');
+        const colorInput = document.getElementById('watermark-color');
+        const fontSel = document.getElementById('watermark-font');
+        const pagesInput = document.getElementById('watermark-pages');
+        const tileInput = document.getElementById('watermark-tile');
+        const scaleInput = document.getElementById('watermark-scale');
         const btn = document.getElementById('watermark-process');
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
+            const imgFiles = Array.from(imageInput?.files || []);
             try {
                 modalManager.showProgress('Adding Watermark...', 'Processing PDF...');
                 await this.execute(files, {
+                    type: typeSel?.value,
                     text: textInput?.value,
                     opacity: opacityInput?.value,
                     angle: angleInput?.value,
-                    autofit: autoFitInput?.checked,
-                    size: sizeInput?.value
+                    size: sizeInput?.value,
+                    color: colorInput?.value,
+                    font: fontSel?.value,
+                    pages: pagesInput?.value,
+                    tile: tileInput?.checked,
+                    imageFile: imgFiles[0],
+                    scale: scaleInput?.value
                 });
                 window.notificationManager?.show('Watermark added successfully!', 'success');
             } catch (err) {
