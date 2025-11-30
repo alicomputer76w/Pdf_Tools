@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1976d2">
+    <meta name="robots" content="noindex,follow" id="robots-meta">
     <!-- Favicon -->
     <link rel="shortcut icon" href="icon.ico?v=2" type="image/x-icon">
     <link rel="icon" href="icon.ico?v=2" type="image/x-icon" sizes="any">
@@ -47,15 +48,15 @@
     </script>
     <script>
       (function(){
-        var h=location.hostname;
-        if(h.indexOf('github.io')!==-1){
-          var m=document.createElement('meta');
-          m.name='robots';
-          m.content='noindex,follow';
-          document.head.appendChild(m);
-          var p=location.pathname.replace(/^\/Pdf_Tools/,'');
-          var u='https://pdfescape.online'+p+location.search+location.hash;
+        var h = location.hostname;
+        var robots = document.querySelector('meta[name="robots"]#robots-meta');
+        if (h.indexOf('github.io') !== -1) {
+          if (robots) robots.setAttribute('content','noindex,follow');
+          var p = location.pathname.replace(/^\/Pdf_Tools/, '');
+          var u = 'https://pdfescape.online' + p + location.search + location.hash;
           location.replace(u);
+        } else {
+          if (robots) robots.setAttribute('content','index,follow');
         }
       })();
     </script>
