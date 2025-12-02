@@ -738,7 +738,7 @@ class SearchFilterManager {
     constructor() {
         this.searchInput = document.getElementById('tool-search');
         this.filterTabs = document.querySelectorAll('.filter-tab');
-        this.toolCards = document.querySelectorAll('.tool-card');
+        this.toolCards = document.querySelectorAll('#tools-grid .tool-card');
         this.currentFilter = 'all';
         this.currentSearch = '';
         
@@ -805,8 +805,10 @@ class SearchFilterManager {
     matchesSearch(card) {
         if (!this.currentSearch) return true;
         
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        const description = card.querySelector('p').textContent.toLowerCase();
+        const titleEl = card.querySelector('h3');
+        const descEl = card.querySelector('p');
+        const title = (titleEl?.textContent || '').toLowerCase();
+        const description = (descEl?.textContent || '').toLowerCase();
         
         return title.includes(this.currentSearch) || description.includes(this.currentSearch);
     }

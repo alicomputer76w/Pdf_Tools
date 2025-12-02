@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Tools Guide</title>
+    <meta name="description" content="PDFEscape Online ke tamam tools ka istemal step-by-step guide">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1976d2">
+    <link rel="shortcut icon" href="icon.ico?v=2" type="image/x-icon">
+    <link rel="icon" href="icon.ico?v=2" type="image/x-icon" sizes="any">
+    <link rel="icon" type="image/png" href="icon.png?v=2" sizes="32x32">
+    <link rel="apple-touch-icon" href="icon.png?v=2" sizes="180x180">
+    <link rel="canonical" href="https://pdfescape.online/guide.html">
+    <meta name="robots" content="index,follow">
+    <style>
+        .guide-hero {background: linear-gradient(135deg, #1976d2 0%, #42a5f5 60%); color: #fff; border-radius: 12px; padding: 24px;}
+        .guide-hero h2 {margin: 0 0 8px 0; font-weight: 600;}
+        .guide-hero p {margin: 0; opacity: .95;}
+        .picker-card {display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.05);}
+        .picker-card select {border:none; outline:none; background:transparent; font-size: 15px;}
+        .tool-catalog {display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:16px; margin-top: 16px;}
+        .tool-select {cursor:pointer; transition: transform .12s ease, box-shadow .12s ease;}
+        .tool-select:hover {transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.08);}
+        .tool-number {display:inline-block; background:#e3f2fd; color:#1976d2; font-weight:600; padding:2px 8px; border-radius:999px; font-size:12px; margin-bottom:8px;}
+        .guide-list {list-style:none; padding-left:0; margin: 8px 0 0 0;}
+        .guide-list li {display:flex; align-items:flex-start; gap:8px; padding:6px 0;}
+        .guide-list li i {color:#2e7d32;}
+        .bot-section .tool-card {position: relative; overflow: hidden;}
+        .bot-nav {display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 14px 0;}
+        .chip {border:1px solid #e5e7eb; background:#fff; border-radius:999px; padding:6px 12px; font-size:13px; cursor:pointer; transition:all .12s ease;}
+        .chip:hover {background:#f6f8fa;}
+        .chip.active {background:#e3f2fd; color:#1976d2; border-color:#bbdefb;}
+        .code-block {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; white-space: pre-wrap; background: #0d1117; color:#c9d1d9; border-radius: 12px; padding:16px; border:1px solid #1f2937; box-shadow: 0 8px 24px rgba(0,0,0,.15); animation: fadeUp .18s ease;}
+        .btn.btn-primary.copy {margin-top:10px;}
+        .toast {position:absolute; right:16px; bottom:16px; background:#2e7d32; color:#fff; padding:8px 12px; border-radius:8px; opacity:0; transform: translateY(8px); transition: all .18s ease;}
+        .toast.show {opacity:1; transform: translateY(0);}
+        @keyframes fadeUp {from{opacity:0; transform: translateY(6px);} to{opacity:1; transform: translateY(0);} }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="material-icons">help_outline</i>
+                    <h1>PDF Tools Guide</h1>
+                </div>
+                <nav class="top-nav-links" aria-label="Primary Navigation" style="display: flex; gap: 16px; align-items: center; margin-left: auto;">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="feedback.html" class="nav-link">Feedback</a>
+                    <a href="guide.html" class="nav-link" aria-current="page">Guide</a>
+                    <a href="help.html" class="nav-link">Help</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="guide-hero">
+                <h2>Mehboob Tools ka Guide</h2>
+                <p>Baraye mehrbani, apna tool select karein. Neeche sab tools stylish cards ki surat me available hain.</p>
+            </section>
+
+            <section class="search-section" style="margin-top:12px;">
+                <div class="picker-card" style="max-width:720px;">
+                    <i class="material-icons" aria-hidden="true">handyman</i>
+                    <select id="guide-select" aria-label="Select a tool" style="width:100%;">
+                        <option value="" selected>Please select one tool that you want to use</option>
+                        <option value="pdf-to-word">1) PDF to Word</option>
+                        <option value="pdf-to-image">2) PDF to Image</option>
+                        <option value="merger">3) PDF Merger</option>
+                        <option value="splitter">4) PDF Splitter</option>
+                        <option value="compressor">5) PDF Compressor</option>
+                        <option value="image-to-pdf">6) Image to PDF</option>
+                        <option value="watermark">7) Watermark Adder</option>
+                        <option value="rotator">8) Page Rotator</option>
+                        <option value="metadata">9) Metadata Editor</option>
+                        <option value="form-filler">10) Form Filler</option>
+                        <option value="signature">11) Digital Signature</option>
+                        <option value="text-extractor">12) Text Extractor</option>
+                        <option value="page-numbering">13) Page Numbering</option>
+                        <option value="bookmark">14) Bookmark Manager</option>
+                        <option value="resizer">15) Page Resizer</option>
+                        <option value="ocr">16) OCR Tool</option>
+                        <option value="annotation">17) Annotation Tool</option>
+                        <option value="optimizer">18) Quality Optimizer</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="tool-catalog" aria-label="Tool catalog">
+                <div class="tool-card tool-select" data-tool="pdf-to-word">
+                    <span class="tool-number">1</span>
+                    <div class="tool-icon"><i class="material-icons">description</i></div>
+                    <h3>PDF to Word</h3>
+                    <p>PDF ko editable DOCX me convert karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="pdf-to-image">
+                    <span class="tool-number">2</span>
+                    <div class="tool-icon"><i class="material-icons">image</i></div>
+                    <h3>PDF to Image</h3>
+                    <p>Pages ko high‑quality images me badlein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="merger">
+                    <span class="tool-number">3</span>
+                    <div class="tool-icon"><i class="material-icons">merge_type</i></div>
+                    <h3>PDF Merger</h3>
+                    <p>Multiple PDFs ko aik document me jorain.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="splitter">
+                    <span class="tool-number">4</span>
+                    <div class="tool-icon"><i class="material-icons">content_cut</i></div>
+                    <h3>PDF Splitter</h3>
+                    <p>Specific pages ko alag files me nikaalein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="compressor">
+                    <span class="tool-number">5</span>
+                    <div class="tool-icon"><i class="material-icons">compress</i></div>
+                    <h3>PDF Compressor</h3>
+                    <p>File size kam karein, quality madde nazar.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="image-to-pdf">
+                    <span class="tool-number">6</span>
+                    <div class="tool-icon"><i class="material-icons">photo_library</i></div>
+                    <h3>Image to PDF</h3>
+                    <p>Images se turant PDF banayein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="watermark">
+                    <span class="tool-number">7</span>
+                    <div class="tool-icon"><i class="material-icons">branding_watermark</i></div>
+                    <h3>Watermark Adder</h3>
+                    <p>Text ya Image watermark add karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="rotator">
+                    <span class="tool-number">8</span>
+                    <div class="tool-icon"><i class="material-icons">rotate_right</i></div>
+                    <h3>Page Rotator</h3>
+                    <p>Galat orientation ko theek karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="metadata">
+                    <span class="tool-number">9</span>
+                    <div class="tool-icon"><i class="material-icons">info</i></div>
+                    <h3>Metadata Editor</h3>
+                    <p>Title/Author waghera update karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="form-filler">
+                    <span class="tool-number">10</span>
+                    <div class="tool-icon"><i class="material-icons">edit_note</i></div>
+                    <h3>Form Filler</h3>
+                    <p>Fillable forms ko asani se fill karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="signature">
+                    <span class="tool-number">11</span>
+                    <div class="tool-icon"><i class="material-icons">draw</i></div>
+                    <h3>Digital Signature</h3>
+                    <p>Signature image pages par add karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="text-extractor">
+                    <span class="tool-number">12</span>
+                    <div class="tool-icon"><i class="material-icons">text_fields</i></div>
+                    <h3>Text Extractor</h3>
+                    <p>PDF se text nikaalein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="page-numbering">
+                    <span class="tool-number">13</span>
+                    <div class="tool-icon"><i class="material-icons">format_list_numbered</i></div>
+                    <h3>Page Numbering</h3>
+                    <p>Pages par numbers add karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="bookmark">
+                    <span class="tool-number">14</span>
+                    <div class="tool-icon"><i class="material-icons">bookmark</i></div>
+                    <h3>Bookmark Manager</h3>
+                    <p>TOC page generate karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="resizer">
+                    <span class="tool-number">15</span>
+                    <div class="tool-icon"><i class="material-icons">aspect_ratio</i></div>
+                    <h3>Page Resizer</h3>
+                    <p>Target size me pages resize karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="ocr">
+                    <span class="tool-number">16</span>
+                    <div class="tool-icon"><i class="material-icons">scanner</i></div>
+                    <h3>OCR Tool</h3>
+                    <p>Scanned PDFs se text extract karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="annotation">
+                    <span class="tool-number">17</span>
+                    <div class="tool-icon"><i class="material-icons">note_add</i></div>
+                    <h3>Annotation Tool</h3>
+                    <p>Comments/notes add karein.</p>
+                </div>
+                <div class="tool-card tool-select" data-tool="optimizer">
+                    <span class="tool-number">18</span>
+                    <div class="tool-icon"><i class="material-icons">tune</i></div>
+                    <h3>Quality Optimizer</h3>
+                    <p>Quality aur performance optimize karein.</p>
+                </div>
+            </section>
+
+            <section id="guide-output" class="tools-grid" style="margin-top:16px;">
+                <div class="tool-card" style="width:100%;">
+                    <div class="tool-icon"><i class="material-icons">list_alt</i></div>
+                    <h3>Selected Tool Guide</h3>
+                    <ol id="guide-list" class="guide-list">
+                        <li><i class="material-icons" aria-hidden="true">check_circle</i><span>Kisi tool ko select karne ke baad yahaan step-by-step procedure nazar aayega.</span></li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="bot-section" style="margin-top:24px;">
+                <div class="tool-card" style="width:100%;">
+                    <div class="tool-icon"><i class="material-icons">chat</i></div>
+                    <h3>Ready‑Made Bot Responses (Copy‑Paste for n8n)</h3>
+                    <div class="bot-nav">
+                        <button class="chip active" data-block="welcome">Welcome</button>
+                        <button class="chip" data-block="pdf-to-word">PDF → Word</button>
+                        <button class="chip" data-block="merger">Merge PDF</button>
+                        <button class="chip" data-block="splitter">Split PDF</button>
+                        <button class="chip" data-block="compressor">Compress PDF</button>
+                        <button class="chip" data-block="image-to-pdf">Image → PDF</button>
+                        <button class="chip" data-block="watermark">Watermark</button>
+                        <button class="chip" data-block="rotator">Page Rotator</button>
+                        <button class="chip" data-block="metadata">Metadata</button>
+                        <button class="chip" data-block="form-filler">Form Filler</button>
+                        <button class="chip" data-block="signature">Signature</button>
+                        <button class="chip" data-block="text-extractor">Text Extractor</button>
+                        <button class="chip" data-block="page-numbering">Page Numbering</button>
+                        <button class="chip" data-block="bookmark">Bookmark</button>
+                        <button class="chip" data-block="resizer">Page Resizer</button>
+                        <button class="chip" data-block="ocr">OCR</button>
+                        <button class="chip" data-block="annotation">Annotation</button>
+                        <button class="chip" data-block="optimizer">Optimizer</button>
+                    </div>
+                    <div class="code-block" id="bot-code"></div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+                        <button id="copy-bot" class="btn btn-primary copy">Copy</button>
+                    </div>
+                    <div id="bot-toast" class="toast">Copied!</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <section style="margin:24px 0;">
+        <div class="tools-grid" style="grid-template-columns: repeat(2, minmax(240px, 1fr)); gap: 16px;">
+            <div class="tool-card">
+                <h3>Quick Start — Popular Tools</h3>
+                <ul>
+                    <li>PDF to Word: Open tool → upload PDF → Convert → DOCX download</li>
+                    <li>Merge PDF: Select tool → upload multiple → Order set → Merge → download</li>
+                    <li>Split PDF: Open tool → upload PDF → pages select → Split → download</li>
+                    <li>Compress PDF: Choose tool → upload PDF → quality/scale set → Compress → download</li>
+                    <li>Image to PDF: Open tool → upload PNG/JPG → arrange → Convert → download</li>
+                    <li>Watermark Adder: Open tool → Text/Image select → options set → Add → download</li>
+                </ul>
+            </div>
+            <div class="tool-card">
+                <h3>Sponsored</h3>
+                <div class="ad-slot" style="min-height: 120px; background: #f7f7f7; border: 1px solid #eee; border-radius: 8px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="help-content" style="margin:24px 0;">
+        <h2>Frequently Asked Questions</h2>
+        <div class="tools-grid" style="grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 16px;">
+            <div class="tool-card">
+                <h3>Processing local hota hai?</h3>
+                <p>Haan, tamam processing aapke browser me local hoti hai. Aapki files device se bahar nahi jati.</p>
+            </div>
+            <div class="tool-card">
+                <h3>Supported file types & size?</h3>
+                <p>PDF files up to 50MB support hain. Images: JPG, PNG, GIF, BMP, TIFF.</p>
+            </div>
+            <div class="tool-card">
+                <h3>Privacy & security?</h3>
+                <p>Local processing ki wajah se data secure rehta hai. Sensitive files ko upload karne ki zarurat nahi.</p>
+            </div>
+            <div class="tool-card">
+                <h3>Common errors kaise solve karein?</h3>
+                <p>Agar file corrupt ya bohot badi ho to split/compress try karein. Browser memory limit par heavy PDFs fail ho sakti hain.</p>
+            </div>
+            <div class="tool-card">
+                <h3>Contact & feedback?</h3>
+                <p>Suggestions ya issues ke liye <a href="feedback.html">Feedback</a> page use karein.</p>
+            </div>
+            <div class="tool-card">
+                <h3>Guide kahan milega?</h3>
+                <p>Complete step‑by‑step instructions ke liye isi <a href="guide.html">Guide Page</a> dekhein.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+      const guides = {
+        'pdf-to-word': [
+          'Website open: https://pdfescape.online',
+          '"PDF to Word" tool open karein',
+          'PDF upload karein',
+          'Convert button press karein',
+          'DOCX download ho jayegi'
+        ],
+        'pdf-to-image': [
+          'Website open',
+          '"PDF to Image" tool select',
+          'PDF upload',
+          'Quality/pages set',
+          'Images download'
+        ],
+        'merger': [
+          'Website open',
+          '"PDF Merger" select',
+          'Multiple PDFs upload',
+          'Order set karein',
+          'Merge dabayein aur combined PDF download'
+        ],
+        'splitter': [
+          'Website open',
+          '"PDF Splitter" open',
+          'PDF upload',
+          'Pages select',
+          'Split download'
+        ],
+        'compressor': [
+          'Website open',
+          '"PDF Compressor" choose',
+          'PDF upload',
+          'Quality/scale adjust',
+          'Compressed PDF download'
+        ],
+        'image-to-pdf': [
+          'Website open',
+          '"Image to PDF" open',
+          'PNG/JPG upload',
+          'Arrange karein',
+          'Convert download'
+        ],
+        'watermark': [
+          'Website open',
+          '"Watermark" open',
+          'Type: Text/Image select',
+          'Options set karein (angle/opacity/pages)',
+          'Add Watermark aur download'
+        ],
+        'rotator': [
+          'Website open',
+          '"Page Rotator" open',
+          'PDF upload',
+          'Angle set',
+          'Apply/Download'
+        ],
+        'metadata': [
+          'Website open',
+          '"Metadata" open',
+          'PDF upload',
+          'Title/Author/Subject set',
+          'Save/Download'
+        ],
+        'form-filler': [
+          'Website open',
+          '"Form Filler" open',
+          'PDF upload',
+          'Fields fill',
+          'Save/Download'
+        ],
+        'signature': [
+          'Website open',
+          '"Signature" open',
+          'PDF + signature image upload',
+          'Scale/position set',
+          'Apply/Download'
+        ],
+        'text-extractor': [
+          'Website open',
+          '"Text Extractor" open',
+          'PDF upload',
+          'Extract text',
+          'TXT download'
+        ],
+        'page-numbering': [
+          'Website open',
+          '"Page Numbering" open',
+          'PDF upload',
+          'Position/font/format set',
+          'Apply/Download'
+        ],
+        'bookmark': [
+          'Website open',
+          '"Bookmark" open',
+          'PDF upload',
+          'Page:title list enter',
+          'TOC add/Download'
+        ],
+        'resizer': [
+          'Website open',
+          '"Page Resizer" open',
+          'PDF upload',
+          'Preset ya custom size set',
+          'Apply/Download'
+        ],
+        'ocr': [
+          'Website open',
+          '"OCR" open',
+          'PDF upload',
+          'Language select',
+          'Run OCR aur TXT download'
+        ],
+        'annotation': [
+          'Website open',
+          '"Annotation" open',
+          'PDF upload',
+          'Comments/notes add',
+          'Save/Download'
+        ],
+        'optimizer': [
+          'Website open',
+          '"Optimizer" open',
+          'PDF upload',
+          'Quality set',
+          'Optimize/Download'
+        ]
+      };
+      const sel = document.getElementById('guide-select');
+      const list = document.getElementById('guide-list');
+      function renderSteps(key){
+        while(list.firstChild) list.removeChild(list.firstChild);
+        const steps = guides[key] || ['Kisi tool ko select karne ke baad yahaan step-by-step procedure nazar aayega.'];
+        steps.forEach((s)=>{
+          const li = document.createElement('li');
+          const ico = document.createElement('i'); ico.className='material-icons'; ico.textContent='check_circle';
+          const span = document.createElement('span'); span.textContent = s;
+          li.appendChild(ico); li.appendChild(span);
+          list.appendChild(li);
+        });
+        list.parentElement.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+      sel.addEventListener('change', () => { const key = sel.value; renderSteps(key); });
+      document.querySelectorAll('.tool-select').forEach(card=>{
+        card.addEventListener('click', ()=>{
+          const key = card.getAttribute('data-tool');
+          sel.value = key;
+          renderSteps(key);
+        });
+      });
+    </script>
+    <script>
+      const botBlocks = {
+        welcome:
+`Assalam-o-Alaikum! 👋
+Welcome to PDFEscape Online Helper Bot.
+
+Choose a tool:
+1) PDF to Word
+2) PDF to Image
+3) Merge PDF
+4) Split PDF
+5) Compress PDF
+6) Image to PDF
+7) Watermark Adder
+8) Page Rotator
+9) Metadata Editor
+10) Form Filler
+11) Digital Signature
+12) Text Extractor
+13) Page Numbering
+14) Bookmark Manager
+15) Page Resizer
+16) OCR Tool
+17) Annotation Tool
+18) Quality Optimizer
+
+Aap tool ka number ya name bhej dein.`,
+        'pdf-to-word':
+`PDF → Word Guide
+
+1) Website open: https://pdfescape.online
+2) "PDF to Word" tool par click
+3) Apna PDF upload karein
+4) Convert button press karein
+5) DOCX download ho jayegi`,
+        merger:
+`Merge PDF Guide
+
+1) Website open: https://pdfescape.online
+2) "PDF Merger" select karein
+3) Multiple PDFs upload karein
+4) Order set karein
+5) "Merge" dabayein
+6) Combined PDF download ho jayegi`,
+        splitter:
+`Split PDF Guide
+
+1) Website open
+2) "PDF Splitter" open karein
+3) PDF upload karein
+4) Pages select karein
+5) Split file download ho jayegi`,
+        compressor:
+`Compress PDF Guide
+
+1) Website open
+2) "PDF Compressor" choose karein
+3) PDF upload karein
+4) Quality/scale adjust karein
+5) Choti size ki PDF download karein`,
+        'image-to-pdf':
+`Image → PDF Guide
+
+1) "Image to PDF" tool open
+2) PNG/JPG images upload
+3) Arrange karein
+4) Convert dabayein`,
+        watermark:
+`Watermark Adder Guide
+
+1) "Watermark" tool open
+2) Type: Text/Image select
+3) File select karein
+4) Angle/opacity/pages/tile set karein
+5) Add Watermark dabayein`,
+        rotator:
+`Page Rotator Guide
+
+1) "Page Rotator" open
+2) PDF upload karein
+3) Angle set karein
+4) Apply/Download`,
+        metadata:
+`Metadata Editor Guide
+
+1) "Metadata" open
+2) PDF upload
+3) Title/Author/Subject update
+4) Save/Download`,
+        'form-filler':
+`Form Filler Guide
+
+1) "Form Filler" open
+2) PDF upload
+3) Fields fill karein
+4) Save/Download`,
+        signature:
+`Digital Signature Guide
+
+1) "Signature" open
+2) PDF + signature image upload
+3) Scale/position set
+4) Apply/Download`,
+        'text-extractor':
+`Text Extractor Guide
+
+1) "Text Extractor" open
+2) PDF upload
+3) Extract text
+4) TXT download`,
+        'page-numbering':
+`Page Numbering Guide
+
+1) "Page Numbering" open
+2) PDF upload
+3) Position/font/format set
+4) Apply/Download`,
+        bookmark:
+`Bookmark Manager Guide
+
+1) "Bookmark" open
+2) PDF upload
+3) Page:title list enter
+4) TOC add/Download`,
+        resizer:
+`Page Resizer Guide
+
+1) "Page Resizer" open
+2) PDF upload
+3) Preset ya custom size set
+4) Apply/Download`,
+        ocr:
+`OCR Tool Guide
+
+1) "OCR" open
+2) PDF upload
+3) Language select
+4) Run OCR
+5) TXT download`,
+        annotation:
+`Annotation Tool Guide
+
+1) "Annotation" open
+2) PDF upload
+3) Comments/notes add
+4) Save/Download`,
+        optimizer:
+`Quality Optimizer Guide
+
+1) "Optimizer" open
+2) PDF upload
+3) Quality set
+4) Optimize/Download`
+      };
+      const botCode = document.getElementById('bot-code');
+      const botToast = document.getElementById('bot-toast');
+      function renderBot(block){ botCode.textContent = botBlocks[block] || ''; }
+      function setActiveChip(block){
+        document.querySelectorAll('.bot-nav .chip').forEach(c=>{
+          c.classList.toggle('active', c.getAttribute('data-block')===block);
+        });
+      }
+      document.querySelectorAll('.bot-nav .chip').forEach(chip=>{
+        chip.addEventListener('click', ()=>{ const b = chip.getAttribute('data-block'); renderBot(b); setActiveChip(b); });
+      });
+      document.getElementById('copy-bot').addEventListener('click', async ()=>{
+        try { await navigator.clipboard.writeText(botCode.textContent || ''); botToast.classList.add('show'); setTimeout(()=> botToast.classList.remove('show'), 1200); }
+        catch(e){}
+      });
+      renderBot('welcome');
+      setActiveChip('welcome');
+    </script>
+    <footer style="margin-top:40px; padding:16px; text-align:center; color:#555; font-size:14px;">
+        Developed by Sadaqat Ali
+    </footer>
+</body>
+</html>

@@ -196,20 +196,37 @@ class PDFToWordTool extends BaseTool {
             }));
 
             for (const line of lines) {
-                line.sort((a, b) => a.transform[4] - b.transform[4]);
+                // Build a provisional text to detect RTL first
+                let probe = line.map(it => it.str).join(' ');
+                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(probe));
+
+                // Sort by X depending on direction (RTL needs descending X)
+                line.sort((a, b) => rtl ? (b.transform[4] - a.transform[4]) : (a.transform[4] - b.transform[4]));
+
                 let text = '';
                 for (let k = 0; k < line.length; k++) {
                     const it = line[k];
                     if (k > 0) {
                         const prev = line[k - 1];
-                        const gap = it.transform[4] - prev.transform[4] - (prev.width || 0);
+                        const gap = Math.abs(it.transform[4] - (prev.transform[4] + (rtl ? -prev.width : prev.width)));
                         if (gap > 1) text += ' ';
                     }
                     text += it.str;
                 }
-                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(text));
-                const run = new TextRun({ text, font: rtl ? 'Arial Unicode MS' : 'Calibri' });
-                children.push(new Paragraph({ children: [run], alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT }));
+
+                const run = new TextRun({
+                    text,
+                    rightToLeft: rtl ? true : false,
+                    font: rtl
+                        ? { ascii: 'Arial Unicode MS', hAnsi: 'Arial Unicode MS', cs: 'Arial Unicode MS' }
+                        : { ascii: 'Calibri', hAnsi: 'Calibri' }
+                });
+
+                children.push(new Paragraph({
+                    children: [run],
+                    alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
+                    bidirectional: rtl ? true : false
+                }));
             }
 
             children.push(new Paragraph({ children: [new TextRun({ text: '' })] }));

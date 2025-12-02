@@ -1742,6 +1742,7 @@ class AnnotationTool extends BaseTool {
 }
 
 /** Bookmark Tool - add a TOC page listing selected bookmarks */
+/** Bookmark Tool - add a TOC page listing selected bookmarks */
 class BookmarkTool extends BaseTool {
     constructor() { super('Bookmark Manager', 'Add a TOC page listing bookmarks'); }
     createInterface() {
