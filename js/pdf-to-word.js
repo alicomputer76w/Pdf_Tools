@@ -160,7 +160,7 @@ class PDFToWordTool extends BaseTool {
                 continue;
             }
 
-            const content = await page.getTextContent();
+            const content = await page.getTextContent({ normalizeWhitespace: true });
             const items = content.items.slice().sort((a, b) => {
                 const ay = a.transform[5];
                 const by = b.transform[5];
@@ -186,6 +186,11 @@ class PDFToWordTool extends BaseTool {
                     current = [it];
                     currentY = y;
                 }
+                if (it.hasEOL) {
+                    lines.push(current);
+                    current = [];
+                    currentY = null;
+                }
             }
             if (current.length) lines.push(current);
 
@@ -208,8 +213,11 @@ class PDFToWordTool extends BaseTool {
                     const it = line[k];
                     if (k > 0) {
                         const prev = line[k - 1];
-                        const gap = Math.abs(it.transform[4] - (prev.transform[4] + (rtl ? -prev.width : prev.width)));
-                        if (gap > 1) text += ' ';
+                        const prevX = prev.transform[4];
+                        const currX = it.transform[4];
+                        const gap = Math.abs(currX - prevX);
+                        const threshold = Math.max(1, (prev.width || 0) * 0.5);
+                        if (gap > threshold) text += ' ';
                     }
                     text += it.str;
                 }
@@ -217,15 +225,13 @@ class PDFToWordTool extends BaseTool {
                 const run = new TextRun({
                     text,
                     rightToLeft: rtl ? true : false,
-                    font: rtl
-                        ? { ascii: 'Arial Unicode MS', hAnsi: 'Arial Unicode MS', cs: 'Arial Unicode MS' }
-                        : { ascii: 'Calibri', hAnsi: 'Calibri' }
+                    font: rtl ? 'Calibri' : 'Calibri'
                 });
 
                 children.push(new Paragraph({
                     children: [run],
                     alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                    bidirectional: rtl ? true : false
+                    rightToLeft: rtl ? true : false
                 }));
             }
 
