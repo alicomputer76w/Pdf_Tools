@@ -26,7 +26,18 @@ class PDFToWordTool extends BaseTool {
                         <label class="option-label">Output Mode:</label>
                         <select class="option-input" id="pdf2word-mode">
                             <option value="editable" selected>Editable text (improved layout)</option>
+                            <option value="exact-editable">Exact editable (positioned text)</option>
                             <option value="exact">Exact layout (image-based)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">RTL Font:</label>
+                        <select class="option-input" id="pdf2word-font">
+                            <option value="auto">Auto (system default)</option>
+                            <option value="Calibri">Calibri</option>
+                            <option value="Noto Naskh Arabic">Noto Naskh Arabic</option>
+                            <option value="Jameel Noori Nastaleeq" selected>Jameel Noori Nastaleeq</option>
+                            <option value="Arial Unicode MS">Arial Unicode MS</option>
                         </select>
                     </div>
                 </div>
@@ -46,8 +57,9 @@ class PDFToWordTool extends BaseTool {
         if (isReady()) return true;
 
         const sources = [
-            // On GitHub Pages, CDN is usually allowed; try CDN first, then local fallback
             'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js',
+            'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/docx.min.js',
+            'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js',
             'https://unpkg.com/docx@8.5.0/build/docx.js',
             'js/vendor/docx.js'
         ];
@@ -77,6 +89,7 @@ class PDFToWordTool extends BaseTool {
         const ok = await this.ensureDocxLoaded();
         const detectMode = (options.detect || 'auto');
         const mode = (options.mode || 'editable');
+        const userFont = (options.font || 'auto');
         const isUrdu = (str) => /[\u0600-\u06FF]/.test(str);
 
         const file = files[0];
@@ -125,7 +138,7 @@ class PDFToWordTool extends BaseTool {
             DownloadUtils.downloadText(rtf, filenameRTF);
             return { success: true, message: `Exported ${pdf.numPages} page(s) to Word-compatible RTF (DOCX library unavailable)` };
         }
-        const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun } = window.docx;
+        const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
         const doc = new Document({ sections: [{ properties: {}, children: [] }] });
         const children = doc.sections[0].children;
@@ -157,6 +170,109 @@ class PDFToWordTool extends BaseTool {
                     spacing: { after: 200 },
                     alignment: AlignmentType.CENTER
                 }));
+                continue;
+            }
+
+            if (mode === 'exact-editable') {
+                const viewport = page.getViewport({ scale: 1 });
+                const content = await page.getTextContent({ normalizeWhitespace: true });
+                const items = content.items.slice().sort((a, b) => {
+                    const ay = a.transform[5];
+                    const by = b.transform[5];
+                    if (by !== ay) return by - ay;
+                    const ax = a.transform[4];
+                    const bx = b.transform[4];
+                    return ax - bx;
+                });
+
+                let lines = [];
+                let current = [];
+                let currentY = null;
+                const yThreshold = 2;
+                for (const it of items) {
+                    const y = it.transform[5];
+                    if (currentY === null) {
+                        currentY = y;
+                        current.push(it);
+                    } else if (Math.abs(y - currentY) <= yThreshold) {
+                        current.push(it);
+                    } else {
+                        lines.push(current);
+                        current = [it];
+                        currentY = y;
+                    }
+                    if (it.hasEOL) {
+                        lines.push(current);
+                        current = [];
+                        currentY = null;
+                    }
+                }
+                if (current.length) lines.push(current);
+
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: `— Page ${i} —`, bold: true })],
+                    spacing: { after: 200 },
+                    alignment: AlignmentType.CENTER
+                }));
+
+                const xs = items.map(it => it.transform[4]).sort((a,b)=>a-b);
+                const colTol = viewport.width * 0.08;
+                const colClusters = [];
+                for (const x of xs) {
+                    const c = colClusters.find(cc => Math.abs(cc.center - x) <= colTol);
+                    if (!c) colClusters.push({ center: x, count: 1 }); else { c.center = (c.center * c.count + x) / (c.count + 1); c.count++; }
+                }
+                const strongCols = colClusters.filter(c => c.count >= 8).sort((a,b)=>a.center-b.center);
+                const useTable = strongCols.length >= 3;
+
+                if (useTable) {
+                    const rows = [];
+                    const yTol = 3;
+                    for (const it of items) {
+                        let r = rows.find(rr => Math.abs(rr.y - it.transform[5]) <= yTol);
+                        if (!r) { r = { y: it.transform[5], cells: Array(strongCols.length).fill('').map(()=>[]) }; rows.push(r); }
+                        let colIdx = 0;
+                        let best = Infinity;
+                        for (let ci = 0; ci < strongCols.length; ci++) {
+                            const d = Math.abs(it.transform[4] - strongCols[ci].center);
+                            if (d < best) { best = d; colIdx = ci; }
+                        }
+                        r.cells[colIdx].push(it.str);
+                    }
+                    rows.sort((a,b)=>b.y-a.y);
+                    const tableRows = rows.map(r => new TableRow({ children: r.cells.map(cell => new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: cell.join(' '), rightToLeft: isUrdu(cell.join(' ')) }) ], alignment: isUrdu(cell.join(' ')) ? AlignmentType.RIGHT : AlignmentType.LEFT }) ] })) }));
+                    const table = new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: tableRows });
+                    children.push(table);
+                } else {
+                    const pageTwips = 11900;
+                    for (const line of lines) {
+                        let probe = line.map(it => it.str).join(' ');
+                        const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(probe));
+                        line.sort((a, b) => rtl ? (b.transform[4] - a.transform[4]) : (a.transform[4] - b.transform[4]));
+                        let text = '';
+                        for (let k = 0; k < line.length; k++) {
+                            const it = line[k];
+                            if (k > 0) {
+                                const prev = line[k - 1];
+                                const prevX = prev.transform[4];
+                                const currX = it.transform[4];
+                                const gap = Math.abs(currX - prevX);
+                                const threshold = Math.max(1, (prev.width || 0) * 0.5);
+                                if (gap > threshold) text += ' ';
+                            }
+                            text += it.str;
+                        }
+                        const fontName = rtl ? (userFont === 'auto' ? 'Jameel Noori Nastaleeq' : userFont) : 'Calibri';
+                        const run = new TextRun({ text, rightToLeft: rtl ? true : false, font: fontName });
+                        const firstX = line[0].transform[4];
+                        const indentTwips = Math.max(0, Math.round((firstX / viewport.width) * pageTwips));
+                        const paragraphProps = { children: [run], alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT, spacing: { after: 100 } };
+                        if (rtl) paragraphProps.indent = { right: indentTwips }; else paragraphProps.indent = { left: indentTwips };
+                        children.push(new Paragraph(paragraphProps));
+                    }
+                }
+
+                children.push(new Paragraph({ children: [new TextRun({ text: '' })] }));
                 continue;
             }
 
@@ -222,16 +338,17 @@ class PDFToWordTool extends BaseTool {
                     text += it.str;
                 }
 
+                const fontName = rtl ? (userFont === 'auto' ? 'Jameel Noori Nastaleeq' : userFont) : 'Calibri';
                 const run = new TextRun({
                     text,
                     rightToLeft: rtl ? true : false,
-                    font: rtl ? 'Calibri' : 'Calibri'
+                    font: fontName
                 });
 
                 children.push(new Paragraph({
                     children: [run],
                     alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                    rightToLeft: rtl ? true : false
+                    bidirectional: rtl ? true : false
                 }));
             }
 
@@ -248,12 +365,13 @@ class PDFToWordTool extends BaseTool {
         const input = document.getElementById('pdf2word-file');
         const detectSel = document.getElementById('pdf2word-detect');
         const modeSel = document.getElementById('pdf2word-mode');
+        const fontSel = document.getElementById('pdf2word-font');
         const btn = document.getElementById('pdf2word-process');
         btn?.addEventListener('click', async () => {
             const files = Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Exporting to Word...', 'Converting PDF text...');
-                await this.execute(files, { detect: detectSel?.value, mode: modeSel?.value });
+                await this.execute(files, { detect: detectSel?.value, mode: modeSel?.value, font: fontSel?.value });
                 window.notificationManager?.show('Word file created successfully!', 'success');
             } catch (err) {
                 console.error('PDF to Word failed:', err);
