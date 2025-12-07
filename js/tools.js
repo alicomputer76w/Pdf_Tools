@@ -328,7 +328,11 @@ class ImageToPDFTool extends BaseTool {
         const doc = await window.PDFLib.PDFDocument.create();
         const ua = (navigator.userAgent || '').toLowerCase();
         const isMobile = /android|iphone|ipad|ipod/.test(ua);
-        const MAX_DIM = isMobile ? 2500 : 4000;
+        const manyImages = files.length >= 6;
+        let MAX_DIM = isMobile ? 2500 : 4000;
+        if (isMobile && manyImages) MAX_DIM = 1600;
+        const JPEG_QUALITY = isMobile ? (manyImages ? 0.8 : 0.85) : 0.92;
+        const LOW_MEM = isMobile && manyImages;
 
         async function loadBitmapWithOrientation(blob) {
             // Prefer createImageBitmap to respect EXIF orientation where supported
@@ -352,6 +356,7 @@ class ImageToPDFTool extends BaseTool {
                 canvas.width = cw; canvas.height = ch;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(bitmap, 0, 0, cw, ch);
+                try { bitmap.close(); } catch {}
                 return canvas;
             }
             // Fallback: HTMLImageElement
@@ -414,8 +419,11 @@ class ImageToPDFTool extends BaseTool {
             let embedded = null;
             try {
                 const mime = (file.type || '').toLowerCase();
-                if (mime.includes('jpeg') || mime.includes('jpg')) {
-                    const jpegBytes = await canvasToJPEGBytes(canvas, isMobile ? 0.85 : 0.92);
+                if (LOW_MEM) {
+                    const jpegBytes = await canvasToJPEGBytes(canvas, JPEG_QUALITY);
+                    embedded = await doc.embedJpg(jpegBytes);
+                } else if (mime.includes('jpeg') || mime.includes('jpg')) {
+                    const jpegBytes = await canvasToJPEGBytes(canvas, JPEG_QUALITY);
                     embedded = await doc.embedJpg(jpegBytes);
                 } else {
                     const pngBytes = await canvasToPNGBytes(canvas);
@@ -428,6 +436,8 @@ class ImageToPDFTool extends BaseTool {
 
             const page = doc.addPage([cw, ch]);
             page.drawImage(embedded, { x: 0, y: 0, width: cw, height: ch });
+            try { canvas.width = 0; canvas.height = 0; } catch {}
+            await new Promise(r => setTimeout(r, 16));
         }
 
         const pdfBytes = await doc.save();
