@@ -326,9 +326,9 @@ class ImageToPDFTool extends BaseTool {
             throw new Error('Select at least one image file');
         }
         const doc = await window.PDFLib.PDFDocument.create();
-
-        // Cap very large images to avoid memory issues. You can tweak this if needed.
-        const MAX_DIM = 4000; // max width/height in pixels
+        const ua = (navigator.userAgent || '').toLowerCase();
+        const isMobile = /android|iphone|ipad|ipod/.test(ua);
+        const MAX_DIM = isMobile ? 2500 : 4000;
 
         async function loadBitmapWithOrientation(blob) {
             // Prefer createImageBitmap to respect EXIF orientation where supported
@@ -343,9 +343,7 @@ class ImageToPDFTool extends BaseTool {
         }
 
         async function drawToCanvas(file) {
-            const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'application/octet-stream' });
-            // Try oriented bitmap first
-            let bitmap = await loadBitmapWithOrientation(blob);
+            let bitmap = await loadBitmapWithOrientation(file);
             if (bitmap) {
                 const scale = Math.min(1, MAX_DIM / Math.max(bitmap.width, bitmap.height));
                 const cw = Math.max(1, Math.round(bitmap.width * scale));
@@ -357,7 +355,7 @@ class ImageToPDFTool extends BaseTool {
                 return canvas;
             }
             // Fallback: HTMLImageElement
-            const url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(file);
             try {
                 const img = await new Promise((resolve, reject) => {
                     const image = new Image();
@@ -413,12 +411,17 @@ class ImageToPDFTool extends BaseTool {
             const canvas = await drawToCanvas(file);
             const cw = canvas.width, ch = canvas.height;
 
-            // Force PNG embedding to avoid JPEG SOI errors
             let embedded = null;
             try {
-                const pngBytes = await canvasToPNGBytes(canvas);
-                if (!isPNG(pngBytes)) throw new Error('Canvas conversion produced invalid PNG');
-                embedded = await doc.embedPng(pngBytes);
+                const mime = (file.type || '').toLowerCase();
+                if (mime.includes('jpeg') || mime.includes('jpg')) {
+                    const jpegBytes = await canvasToJPEGBytes(canvas, isMobile ? 0.85 : 0.92);
+                    embedded = await doc.embedJpg(jpegBytes);
+                } else {
+                    const pngBytes = await canvasToPNGBytes(canvas);
+                    if (!isPNG(pngBytes)) throw new Error('Invalid PNG');
+                    embedded = await doc.embedPng(pngBytes);
+                }
             } catch (e2) {
                 throw new Error(`Image embedding failed: ${e2.message}`);
             }
