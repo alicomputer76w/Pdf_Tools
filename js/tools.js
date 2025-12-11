@@ -309,6 +309,11 @@ class ImageToPDFTool extends BaseTool {
                         <label class="option-label">Output filename:</label>
                         <input type="text" class="option-input" id="img2pdf-filename" value="images-to-pdf.pdf">
                     </div>
+                    <div class="option-group">
+                        <label class="option-label">Image order:</label>
+                        <div id="img2pdf-order" class="option-input" style="display:flex;flex-direction:column;gap:8px;"></div>
+                        <p class="hint">Use ↑ and ↓ to arrange pages before converting.</p>
+                    </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
@@ -465,8 +470,88 @@ class ImageToPDFTool extends BaseTool {
         const input = document.getElementById('img2pdf-files');
         const nameInput = document.getElementById('img2pdf-filename');
         const btn = document.getElementById('img2pdf-process');
+        const orderEl = document.getElementById('img2pdf-order');
+        let orderedFiles = [];
+
+        function renderOrder() {
+            if (!orderEl) return;
+            orderEl.innerHTML = '';
+            orderedFiles.forEach((f, i) => {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.gap = '8px';
+                const badge = document.createElement('span');
+                badge.textContent = String(i + 1);
+                badge.style.minWidth = '24px';
+                badge.style.textAlign = 'center';
+                badge.style.background = 'var(--surface-2, #222)';
+                badge.style.color = 'var(--text-1, #fff)';
+                badge.style.borderRadius = '4px';
+                const name = document.createElement('span');
+                name.textContent = f.name;
+                name.style.flex = '1';
+                const controls = document.createElement('div');
+                controls.style.marginLeft = 'auto';
+                controls.style.display = 'flex';
+                controls.style.gap = '6px';
+                const up = document.createElement('button');
+                up.className = 'btn btn-secondary';
+                up.style.padding = '2px 8px';
+                up.textContent = '↑';
+                up.addEventListener('click', () => {
+                    if (i > 0) {
+                        const t = orderedFiles[i - 1];
+                        orderedFiles[i - 1] = orderedFiles[i];
+                        orderedFiles[i] = t;
+                        renderOrder();
+                    }
+                });
+                const down = document.createElement('button');
+                down.className = 'btn btn-secondary';
+                down.style.padding = '2px 8px';
+                down.textContent = '↓';
+                down.addEventListener('click', () => {
+                    if (i < orderedFiles.length - 1) {
+                        const t = orderedFiles[i + 1];
+                        orderedFiles[i + 1] = orderedFiles[i];
+                        orderedFiles[i] = t;
+                        renderOrder();
+                    }
+                });
+                const top = document.createElement('button');
+                top.className = 'btn btn-secondary';
+                top.style.padding = '2px 8px';
+                top.textContent = 'Top';
+                top.addEventListener('click', () => {
+                    orderedFiles = [orderedFiles[i], ...orderedFiles.filter((_, idx) => idx !== i)];
+                    renderOrder();
+                });
+                const bottom = document.createElement('button');
+                bottom.className = 'btn btn-secondary';
+                bottom.style.padding = '2px 8px';
+                bottom.textContent = 'Bottom';
+                bottom.addEventListener('click', () => {
+                    orderedFiles = [...orderedFiles.filter((_, idx) => idx !== i), orderedFiles[i]];
+                    renderOrder();
+                });
+                controls.appendChild(up);
+                controls.appendChild(down);
+                controls.appendChild(top);
+                controls.appendChild(bottom);
+                row.appendChild(badge);
+                row.appendChild(name);
+                row.appendChild(controls);
+                orderEl.appendChild(row);
+            });
+        }
+
+        input?.addEventListener('change', () => {
+            orderedFiles = Array.from(input.files || []);
+            renderOrder();
+        });
         btn?.addEventListener('click', async () => {
-            const files = Array.from(input?.files || []);
+            const files = orderedFiles.length ? orderedFiles : Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Converting Images...', 'Creating PDF...');
                 await this.execute(files, { filename: nameInput?.value });
