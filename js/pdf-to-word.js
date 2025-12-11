@@ -244,7 +244,9 @@ class PDFToWordTool extends BaseTool {
                     const table = new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: tableRows });
                     children.push(table);
                 } else {
-                    const pageTwips = 11900;
+                    const pageTwipsW = 11900;
+                    const pageTwipsH = 16840;
+                    let prevYForSpacing = null;
                     for (const line of lines) {
                         let probe = line.map(it => it.str).join(' ');
                         const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(probe));
@@ -265,8 +267,18 @@ class PDFToWordTool extends BaseTool {
                         const fontName = rtl ? (userFont === 'auto' ? 'Jameel Noori Nastaleeq' : userFont) : 'Calibri';
                         const run = new TextRun({ text, rightToLeft: rtl ? true : false, font: fontName });
                         const firstX = line[0].transform[4];
-                        const indentTwips = Math.max(0, Math.round((firstX / viewport.width) * pageTwips));
-                        const paragraphProps = { children: [run], alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT, spacing: { after: 100 } };
+                        const indentTwips = Math.max(0, Math.round((firstX / viewport.width) * pageTwipsW));
+
+                        // Vertical spacing based on PDF Y delta
+                        const currentY = line[0].transform[5];
+                        let beforeTwips = 0;
+                        if (prevYForSpacing !== null) {
+                            const deltaY = Math.abs(prevYForSpacing - currentY);
+                            beforeTwips = Math.max(0, Math.round((deltaY / viewport.height) * pageTwipsH) - 120);
+                        }
+                        prevYForSpacing = currentY;
+
+                        const paragraphProps = { children: [run], alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT, spacing: { before: beforeTwips, after: 60 } };
                         if (rtl) paragraphProps.indent = { right: indentTwips }; else paragraphProps.indent = { left: indentTwips };
                         children.push(new Paragraph(paragraphProps));
                     }

@@ -329,9 +329,13 @@ class ImageToPDFTool extends BaseTool {
         const ua = (navigator.userAgent || '').toLowerCase();
         const isMobile = /android|iphone|ipad|ipod/.test(ua);
         const manyImages = files.length >= 6;
-        let MAX_DIM = isMobile ? 2500 : 4000;
-        if (isMobile && manyImages) MAX_DIM = 1600;
-        const JPEG_QUALITY = isMobile ? (manyImages ? 0.8 : 0.85) : 0.92;
+        function calcMobileDims(len) {
+            if (len <= 8) return { dim: 2000, quality: 0.85 };
+            if (len <= 15) return { dim: 1600, quality: 0.8 };
+            return { dim: 1200, quality: 0.7 };
+        }
+        let MAX_DIM = isMobile ? calcMobileDims(files.length).dim : 4000;
+        const JPEG_QUALITY = isMobile ? calcMobileDims(files.length).quality : 0.92;
         const LOW_MEM = isMobile && manyImages;
 
         async function loadBitmapWithOrientation(blob) {
@@ -407,13 +411,20 @@ class ImageToPDFTool extends BaseTool {
         }
 
         let index = 0;
+        const skipped = [];
         for (const file of files) {
             index++;
             // Update progress for UX (non-blocking)
             try { modalManager.updateProgress(Math.round((index / files.length) * 100), `Processing image ${index}/${files.length}`); } catch {}
 
             // Draw to canvas (handles WebP, HEIC via browser support, and applies downscaling)
-            const canvas = await drawToCanvas(file);
+            let canvas;
+            try {
+                canvas = await drawToCanvas(file);
+            } catch (e) {
+                skipped.push(file.name);
+                continue;
+            }
             const cw = canvas.width, ch = canvas.height;
 
             let embedded = null;
@@ -431,19 +442,23 @@ class ImageToPDFTool extends BaseTool {
                     embedded = await doc.embedPng(pngBytes);
                 }
             } catch (e2) {
-                throw new Error(`Image embedding failed: ${e2.message}`);
+                skipped.push(file.name);
+                try { canvas.width = 0; canvas.height = 0; } catch {}
+                await new Promise(r => setTimeout(r, 30));
+                continue;
             }
 
             const page = doc.addPage([cw, ch]);
             page.drawImage(embedded, { x: 0, y: 0, width: cw, height: ch });
             try { canvas.width = 0; canvas.height = 0; } catch {}
-            await new Promise(r => setTimeout(r, 16));
+            await new Promise(r => setTimeout(r, 30));
         }
 
         const pdfBytes = await doc.save();
         const filename = (options.filename || 'images-to-pdf.pdf').trim();
         DownloadUtils.downloadPDF(pdfBytes, filename);
-        return { success: true, message: `Created ${filename}` };
+        const msg = skipped.length ? `Created ${filename} (skipped ${skipped.length} image(s): ${skipped.join(', ')})` : `Created ${filename}`;
+        return { success: true, message: msg };
     }
 
     attachHandlers() {
