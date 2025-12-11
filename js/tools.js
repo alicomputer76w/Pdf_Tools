@@ -310,9 +310,9 @@ class ImageToPDFTool extends BaseTool {
                         <input type="text" class="option-input" id="img2pdf-filename" value="images-to-pdf.pdf">
                     </div>
                     <div class="option-group">
-                        <label class="option-label">Image order:</label>
-                        <div id="img2pdf-order" class="option-input" style="display:flex;flex-direction:column;gap:8px;"></div>
-                        <p class="hint">Use ↑ and ↓ to arrange pages before converting.</p>
+                        <label class="option-label">Preview & order:</label>
+                        <div id="img2pdf-grid" class="option-input" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;align-items:start;"></div>
+                        <p class="hint">Drag thumbnails or use arrows to rearrange. Tap ✖ to remove.</p>
                     </div>
                 </div>
                 <div class="action-buttons">
@@ -470,85 +470,106 @@ class ImageToPDFTool extends BaseTool {
         const input = document.getElementById('img2pdf-files');
         const nameInput = document.getElementById('img2pdf-filename');
         const btn = document.getElementById('img2pdf-process');
-        const orderEl = document.getElementById('img2pdf-order');
+        const gridEl = document.getElementById('img2pdf-grid');
         let orderedFiles = [];
 
-        function renderOrder() {
-            if (!orderEl) return;
-            orderEl.innerHTML = '';
+        function renderGrid() {
+            if (!gridEl) return;
+            gridEl.innerHTML = '';
             orderedFiles.forEach((f, i) => {
-                const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.alignItems = 'center';
-                row.style.gap = '8px';
-                const badge = document.createElement('span');
+                const tile = document.createElement('div');
+                tile.className = 'img-tile';
+                tile.style.position = 'relative';
+                tile.style.border = '1px solid var(--surface-3, #444)';
+                tile.style.borderRadius = '6px';
+                tile.style.overflow = 'hidden';
+                tile.style.background = 'var(--surface-1, #111)';
+                tile.draggable = true;
+                tile.dataset.index = String(i);
+
+                const img = document.createElement('img');
+                img.alt = f.name;
+                img.style.width = '100%';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                const url = URL.createObjectURL(f);
+                img.src = url;
+                img.onload = () => URL.revokeObjectURL(url);
+
+                const badge = document.createElement('div');
                 badge.textContent = String(i + 1);
-                badge.style.minWidth = '24px';
-                badge.style.textAlign = 'center';
-                badge.style.background = 'var(--surface-2, #222)';
-                badge.style.color = 'var(--text-1, #fff)';
+                badge.style.position = 'absolute';
+                badge.style.top = '6px';
+                badge.style.left = '6px';
+                badge.style.background = 'rgba(0,0,0,0.6)';
+                badge.style.color = '#fff';
+                badge.style.padding = '2px 6px';
                 badge.style.borderRadius = '4px';
-                const name = document.createElement('span');
-                name.textContent = f.name;
-                name.style.flex = '1';
+
                 const controls = document.createElement('div');
-                controls.style.marginLeft = 'auto';
+                controls.style.position = 'absolute';
+                controls.style.bottom = '6px';
+                controls.style.left = '50%';
+                controls.style.transform = 'translateX(-50%)';
                 controls.style.display = 'flex';
                 controls.style.gap = '6px';
-                const up = document.createElement('button');
-                up.className = 'btn btn-secondary';
-                up.style.padding = '2px 8px';
-                up.textContent = '↑';
-                up.addEventListener('click', () => {
-                    if (i > 0) {
-                        const t = orderedFiles[i - 1];
-                        orderedFiles[i - 1] = orderedFiles[i];
-                        orderedFiles[i] = t;
-                        renderOrder();
-                    }
+
+                function swap(a, b) {
+                    const t = orderedFiles[a];
+                    orderedFiles[a] = orderedFiles[b];
+                    orderedFiles[b] = t;
+                    renderGrid();
+                }
+
+                const left = document.createElement('button');
+                left.className = 'btn btn-secondary';
+                left.style.padding = '2px 8px';
+                left.textContent = '←';
+                left.addEventListener('click', () => { if (i > 0) swap(i, i - 1); });
+
+                const right = document.createElement('button');
+                right.className = 'btn btn-secondary';
+                right.style.padding = '2px 8px';
+                right.textContent = '→';
+                right.addEventListener('click', () => { if (i < orderedFiles.length - 1) swap(i, i + 1); });
+
+                const remove = document.createElement('button');
+                remove.className = 'btn btn-secondary';
+                remove.style.padding = '2px 8px';
+                remove.textContent = '✖';
+                remove.addEventListener('click', () => {
+                    orderedFiles = orderedFiles.filter((_, idx) => idx !== i);
+                    renderGrid();
                 });
-                const down = document.createElement('button');
-                down.className = 'btn btn-secondary';
-                down.style.padding = '2px 8px';
-                down.textContent = '↓';
-                down.addEventListener('click', () => {
-                    if (i < orderedFiles.length - 1) {
-                        const t = orderedFiles[i + 1];
-                        orderedFiles[i + 1] = orderedFiles[i];
-                        orderedFiles[i] = t;
-                        renderOrder();
-                    }
+
+                controls.appendChild(left);
+                controls.appendChild(right);
+                controls.appendChild(remove);
+
+                tile.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', String(i));
                 });
-                const top = document.createElement('button');
-                top.className = 'btn btn-secondary';
-                top.style.padding = '2px 8px';
-                top.textContent = 'Top';
-                top.addEventListener('click', () => {
-                    orderedFiles = [orderedFiles[i], ...orderedFiles.filter((_, idx) => idx !== i)];
-                    renderOrder();
+                tile.addEventListener('dragover', e => { e.preventDefault(); });
+                tile.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    const to = i;
+                    if (!Number.isNaN(from) && from !== to) swap(from, to);
                 });
-                const bottom = document.createElement('button');
-                bottom.className = 'btn btn-secondary';
-                bottom.style.padding = '2px 8px';
-                bottom.textContent = 'Bottom';
-                bottom.addEventListener('click', () => {
-                    orderedFiles = [...orderedFiles.filter((_, idx) => idx !== i), orderedFiles[i]];
-                    renderOrder();
-                });
-                controls.appendChild(up);
-                controls.appendChild(down);
-                controls.appendChild(top);
-                controls.appendChild(bottom);
-                row.appendChild(badge);
-                row.appendChild(name);
-                row.appendChild(controls);
-                orderEl.appendChild(row);
+
+                tile.appendChild(img);
+                tile.appendChild(badge);
+                tile.appendChild(controls);
+                gridEl.appendChild(tile);
             });
         }
 
+        gridEl?.addEventListener('dragover', e => e.preventDefault());
+        gridEl?.addEventListener('drop', e => e.preventDefault());
+
         input?.addEventListener('change', () => {
             orderedFiles = Array.from(input.files || []);
-            renderOrder();
+            renderGrid();
         });
         btn?.addEventListener('click', async () => {
             const files = orderedFiles.length ? orderedFiles : Array.from(input?.files || []);
