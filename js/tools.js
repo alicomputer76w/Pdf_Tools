@@ -309,30 +309,6 @@ class ImageToPDFTool extends BaseTool {
                         <label class="option-label">Output filename:</label>
                         <input type="text" class="option-input" id="img2pdf-filename" value="images-to-pdf.pdf">
                     </div>
-                    <div class="option-group">
-                        <label class="option-label">Preview & order:</label>
-                        <style>
-                            .img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
-                            .img-tile { position:relative; border:1px solid var(--surface-3,#444); border-radius:10px; overflow:hidden; background:var(--surface-1,#111); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
-                            .img-tile img { width:100%; height:120px; object-fit:cover; display:block; }
-                            .img-badge { position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.65); color:#fff; font-size:12px; padding:2px 6px; border-radius:6px; }
-                            .img-remove { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.65); color:#fff; border:none; border-radius:6px; padding:2px 6px; cursor:pointer; }
-                            .img-footer { position:absolute; bottom:0; left:0; right:0; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.55); color:#fff; padding:6px 8px; }
-                            .img-name { flex:1; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-                            .drag-handle { display:flex; align-items:center; justify-content:center; width:28px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,0.25); cursor:grab; }
-                            .img-tile.drop-target { outline:2px dashed #4ea1ff; outline-offset:-2px; }
-                            .img-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
-                        </style>
-                        <div class="img-toolbar">
-                            <button class="btn btn-secondary" id="img2pdf-add"><i class="material-icons">add_photo_alternate</i><span>Add more</span></button>
-                            <button class="btn btn-secondary" id="img2pdf-sort-asc"><i class="material-icons">sort_by_alpha</i><span>A→Z</span></button>
-                            <button class="btn btn-secondary" id="img2pdf-sort-desc"><i class="material-icons">sort</i><span>Z→A</span></button>
-                            <button class="btn btn-secondary" id="img2pdf-reverse"><i class="material-icons">swap_vert</i><span>Reverse</span></button>
-                            <button class="btn btn-secondary" id="img2pdf-clear"><i class="material-icons">delete</i><span>Clear</span></button>
-                        </div>
-                        <div id="img2pdf-grid" class="option-input img-grid"></div>
-                        <p class="hint">Drag thumbnails or use toolbar to arrange. Remove unwanted images.</p>
-                    </div>
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="modalManager.closeModal()">Cancel</button>
@@ -616,7 +592,7 @@ class ImageToPDFTool extends BaseTool {
         reverseBtn?.addEventListener('click', () => { orderedFiles.reverse(); renderGrid(); });
         clearBtn?.addEventListener('click', () => { orderedFiles = []; renderGrid(); });
         btn?.addEventListener('click', async () => {
-            const files = orderedFiles.length ? orderedFiles : Array.from(input?.files || []);
+            const files = Array.from(input?.files || []);
             try {
                 modalManager.showProgress('Converting Images...', 'Creating PDF...');
                 await this.execute(files, { filename: nameInput?.value });
