@@ -1,6 +1,3 @@
 User-agent: *
-# Disallow internal test pages from indexing (covers test, test-, test_*)
-Disallow: /test*
-
-# Sitemap location for this site
+Allow: /
 Sitemap: https://pdfescape.online/sitemap.xml

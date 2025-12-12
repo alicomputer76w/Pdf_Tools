@@ -12,6 +12,12 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1976d2">
     <meta name="robots" content="index,follow" id="robots-meta">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
     <!-- Favicon -->
     <link rel="shortcut icon" href="icon.ico?v=2" type="image/x-icon">
     <link rel="icon" href="icon.ico?v=2" type="image/x-icon" sizes="any">
@@ -46,6 +52,45 @@
       }
     }
     </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Image to PDF",
+          "applicationCategory": "Utilities",
+          "operatingSystem": "Web",
+          "url": "https://pdfescape.online/#image-to-pdf",
+          "offers": { "@type": "Offer", "price": "0" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "PDF Merger",
+          "applicationCategory": "Utilities",
+          "operatingSystem": "Web",
+          "url": "https://pdfescape.online/#pdf-merger",
+          "offers": { "@type": "Offer", "price": "0" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "PDF Splitter",
+          "applicationCategory": "Utilities",
+          "operatingSystem": "Web",
+          "url": "https://pdfescape.online/#pdf-splitter",
+          "offers": { "@type": "Offer", "price": "0" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "PDF to Word",
+          "applicationCategory": "Utilities",
+          "operatingSystem": "Web",
+          "url": "https://pdfescape.online/#pdf-to-word",
+          "offers": { "@type": "Offer", "price": "0" }
+        }
+      ]
+    }
+    </script>
     <script>
       (function(){
         var h = location.hostname;
@@ -68,7 +113,7 @@
         <div class="loading-spinner"></div>
         <p>Loading PDF Tools Suite...</p>
     </div>
-
+    
     <!-- Header -->
     <header class="header">
         <div class="container">
