@@ -311,8 +311,27 @@ class ImageToPDFTool extends BaseTool {
                     </div>
                     <div class="option-group">
                         <label class="option-label">Preview & order:</label>
-                        <div id="img2pdf-grid" class="option-input" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;align-items:start;"></div>
-                        <p class="hint">Drag thumbnails or use arrows to rearrange. Tap ✖ to remove.</p>
+                        <style>
+                            .img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+                            .img-tile { position:relative; border:1px solid var(--surface-3,#444); border-radius:10px; overflow:hidden; background:var(--surface-1,#111); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+                            .img-tile img { width:100%; height:120px; object-fit:cover; display:block; }
+                            .img-badge { position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.65); color:#fff; font-size:12px; padding:2px 6px; border-radius:6px; }
+                            .img-remove { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.65); color:#fff; border:none; border-radius:6px; padding:2px 6px; cursor:pointer; }
+                            .img-footer { position:absolute; bottom:0; left:0; right:0; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.55); color:#fff; padding:6px 8px; }
+                            .img-name { flex:1; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                            .drag-handle { display:flex; align-items:center; justify-content:center; width:28px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,0.25); cursor:grab; }
+                            .img-tile.drop-target { outline:2px dashed #4ea1ff; outline-offset:-2px; }
+                            .img-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+                        </style>
+                        <div class="img-toolbar">
+                            <button class="btn btn-secondary" id="img2pdf-add"><i class="material-icons">add_photo_alternate</i><span>Add more</span></button>
+                            <button class="btn btn-secondary" id="img2pdf-sort-asc"><i class="material-icons">sort_by_alpha</i><span>A→Z</span></button>
+                            <button class="btn btn-secondary" id="img2pdf-sort-desc"><i class="material-icons">sort</i><span>Z→A</span></button>
+                            <button class="btn btn-secondary" id="img2pdf-reverse"><i class="material-icons">swap_vert</i><span>Reverse</span></button>
+                            <button class="btn btn-secondary" id="img2pdf-clear"><i class="material-icons">delete</i><span>Clear</span></button>
+                        </div>
+                        <div id="img2pdf-grid" class="option-input img-grid"></div>
+                        <p class="hint">Drag thumbnails or use toolbar to arrange. Remove unwanted images.</p>
                     </div>
                 </div>
                 <div class="action-buttons">
@@ -479,40 +498,38 @@ class ImageToPDFTool extends BaseTool {
             orderedFiles.forEach((f, i) => {
                 const tile = document.createElement('div');
                 tile.className = 'img-tile';
-                tile.style.position = 'relative';
-                tile.style.border = '1px solid var(--surface-3, #444)';
-                tile.style.borderRadius = '6px';
-                tile.style.overflow = 'hidden';
-                tile.style.background = 'var(--surface-1, #111)';
                 tile.draggable = true;
                 tile.dataset.index = String(i);
 
                 const img = document.createElement('img');
                 img.alt = f.name;
-                img.style.width = '100%';
-                img.style.height = '100px';
-                img.style.objectFit = 'cover';
                 const url = URL.createObjectURL(f);
                 img.src = url;
                 img.onload = () => URL.revokeObjectURL(url);
 
                 const badge = document.createElement('div');
+                badge.className = 'img-badge';
                 badge.textContent = String(i + 1);
-                badge.style.position = 'absolute';
-                badge.style.top = '6px';
-                badge.style.left = '6px';
-                badge.style.background = 'rgba(0,0,0,0.6)';
-                badge.style.color = '#fff';
-                badge.style.padding = '2px 6px';
-                badge.style.borderRadius = '4px';
 
-                const controls = document.createElement('div');
-                controls.style.position = 'absolute';
-                controls.style.bottom = '6px';
-                controls.style.left = '50%';
-                controls.style.transform = 'translateX(-50%)';
-                controls.style.display = 'flex';
-                controls.style.gap = '6px';
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'img-remove';
+                removeBtn.textContent = '✖';
+                removeBtn.addEventListener('click', () => {
+                    orderedFiles = orderedFiles.filter((_, idx) => idx !== i);
+                    renderGrid();
+                });
+
+                const footer = document.createElement('div');
+                footer.className = 'img-footer';
+                const nameEl = document.createElement('span');
+                nameEl.className = 'img-name';
+                nameEl.textContent = f.name;
+                const handle = document.createElement('div');
+                handle.className = 'drag-handle';
+                const icon = document.createElement('i');
+                icon.className = 'material-icons';
+                icon.textContent = 'drag_indicator';
+                handle.appendChild(icon);
 
                 function swap(a, b) {
                     const t = orderedFiles[a];
@@ -520,46 +537,27 @@ class ImageToPDFTool extends BaseTool {
                     orderedFiles[b] = t;
                     renderGrid();
                 }
-
-                const left = document.createElement('button');
-                left.className = 'btn btn-secondary';
-                left.style.padding = '2px 8px';
-                left.textContent = '←';
-                left.addEventListener('click', () => { if (i > 0) swap(i, i - 1); });
-
-                const right = document.createElement('button');
-                right.className = 'btn btn-secondary';
-                right.style.padding = '2px 8px';
-                right.textContent = '→';
-                right.addEventListener('click', () => { if (i < orderedFiles.length - 1) swap(i, i + 1); });
-
-                const remove = document.createElement('button');
-                remove.className = 'btn btn-secondary';
-                remove.style.padding = '2px 8px';
-                remove.textContent = '✖';
-                remove.addEventListener('click', () => {
-                    orderedFiles = orderedFiles.filter((_, idx) => idx !== i);
-                    renderGrid();
-                });
-
-                controls.appendChild(left);
-                controls.appendChild(right);
-                controls.appendChild(remove);
+                handle.addEventListener('click', () => { if (i < orderedFiles.length - 1) swap(i, i + 1); });
 
                 tile.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text/plain', String(i));
                 });
-                tile.addEventListener('dragover', e => { e.preventDefault(); });
+                tile.addEventListener('dragover', e => { e.preventDefault(); tile.classList.add('drop-target'); });
                 tile.addEventListener('drop', e => {
                     e.preventDefault();
                     const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
                     const to = i;
                     if (!Number.isNaN(from) && from !== to) swap(from, to);
+                    tile.classList.remove('drop-target');
                 });
+                tile.addEventListener('dragleave', () => tile.classList.remove('drop-target'));
 
                 tile.appendChild(img);
                 tile.appendChild(badge);
-                tile.appendChild(controls);
+                tile.appendChild(removeBtn);
+                footer.appendChild(nameEl);
+                footer.appendChild(handle);
+                tile.appendChild(footer);
                 gridEl.appendChild(tile);
             });
         }
@@ -568,9 +566,21 @@ class ImageToPDFTool extends BaseTool {
         gridEl?.addEventListener('drop', e => e.preventDefault());
 
         input?.addEventListener('change', () => {
-            orderedFiles = Array.from(input.files || []);
+            const fresh = Array.from(input.files || []);
+            orderedFiles = orderedFiles.length ? orderedFiles.concat(fresh) : fresh;
             renderGrid();
         });
+
+        const addBtn = document.getElementById('img2pdf-add');
+        const sortAscBtn = document.getElementById('img2pdf-sort-asc');
+        const sortDescBtn = document.getElementById('img2pdf-sort-desc');
+        const reverseBtn = document.getElementById('img2pdf-reverse');
+        const clearBtn = document.getElementById('img2pdf-clear');
+        addBtn?.addEventListener('click', () => input?.click());
+        sortAscBtn?.addEventListener('click', () => { orderedFiles.sort((a,b)=>a.name.localeCompare(b.name)); renderGrid(); });
+        sortDescBtn?.addEventListener('click', () => { orderedFiles.sort((a,b)=>b.name.localeCompare(a.name)); renderGrid(); });
+        reverseBtn?.addEventListener('click', () => { orderedFiles.reverse(); renderGrid(); });
+        clearBtn?.addEventListener('click', () => { orderedFiles = []; renderGrid(); });
         btn?.addEventListener('click', async () => {
             const files = orderedFiles.length ? orderedFiles : Array.from(input?.files || []);
             try {
