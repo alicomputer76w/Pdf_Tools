@@ -498,8 +498,9 @@ class ImageToPDFTool extends BaseTool {
             orderedFiles.forEach((f, i) => {
                 const tile = document.createElement('div');
                 tile.className = 'img-tile';
-                tile.draggable = true;
+                tile.draggable = false;
                 tile.dataset.index = String(i);
+                tile.style.touchAction = 'auto';
 
                 const img = document.createElement('img');
                 img.alt = f.name;
@@ -526,6 +527,8 @@ class ImageToPDFTool extends BaseTool {
                 nameEl.textContent = f.name;
                 const handle = document.createElement('div');
                 handle.className = 'drag-handle';
+                handle.draggable = true;
+                handle.style.touchAction = 'none';
                 const icon = document.createElement('i');
                 icon.className = 'material-icons';
                 icon.textContent = 'drag_indicator';
@@ -539,9 +542,11 @@ class ImageToPDFTool extends BaseTool {
                 }
                 handle.addEventListener('click', () => { if (i < orderedFiles.length - 1) swap(i, i + 1); });
 
-                tile.addEventListener('dragstart', e => {
+                handle.addEventListener('dragstart', e => {
+                    try { e.dataTransfer.effectAllowed = 'move'; } catch {}
                     e.dataTransfer.setData('text/plain', String(i));
                 });
+                tile.addEventListener('dragenter', e => { e.preventDefault(); tile.classList.add('drop-target'); });
                 tile.addEventListener('dragover', e => { e.preventDefault(); tile.classList.add('drop-target'); });
                 tile.addEventListener('drop', e => {
                     e.preventDefault();
@@ -551,6 +556,35 @@ class ImageToPDFTool extends BaseTool {
                     tile.classList.remove('drop-target');
                 });
                 tile.addEventListener('dragleave', () => tile.classList.remove('drop-target'));
+
+                // Pointer-based DnD fallback for mobile
+                const isCoarse = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
+                if (isCoarse) {
+                    let dragFrom = null;
+                    handle.addEventListener('pointerdown', e => {
+                        dragFrom = i;
+                        handle.setPointerCapture?.(e.pointerId);
+                        e.preventDefault();
+                    });
+                    handle.addEventListener('pointermove', e => {
+                        if (dragFrom === null) return;
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const target = el && el.closest && el.closest('.img-tile');
+                        gridEl.querySelectorAll('.img-tile').forEach(t => t.classList.remove('drop-target'));
+                        if (target) target.classList.add('drop-target');
+                    });
+                    handle.addEventListener('pointerup', e => {
+                        if (dragFrom === null) return;
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const target = el && el.closest && el.closest('.img-tile');
+                        if (target) {
+                            const to = parseInt(target.dataset.index || '-1', 10);
+                            if (!Number.isNaN(to) && to !== dragFrom) swap(dragFrom, to);
+                        }
+                        gridEl.querySelectorAll('.img-tile').forEach(t => t.classList.remove('drop-target'));
+                        dragFrom = null;
+                    });
+                }
 
                 tile.appendChild(img);
                 tile.appendChild(badge);
