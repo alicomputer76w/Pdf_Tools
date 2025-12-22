@@ -3,220 +3,451 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Feedback • PDF Tools Suite</title>
+  <title>Feedback & Support • PDF Tools Suite</title>
+  <meta name="description" content="Share your feedback, report bugs, or request features directly via WhatsApp. Fast and personal support." />
+  
+  <!-- CSS -->
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/components.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
   <!-- Favicon -->
   <link rel="shortcut icon" href="icon.ico?v=2" type="image/x-icon" />
   <link rel="icon" href="icon.ico?v=2" type="image/x-icon" sizes="any" />
   <link rel="icon" type="image/png" href="icon.png?v=2" sizes="32x32" />
   <link rel="apple-touch-icon" href="icon.png?v=2" sizes="180x180" />
-  <link rel="icon" type="image/png" href="https://pdfescape.online/icon.png?v=2" sizes="32x32" />
-  <link rel="icon" href="https://pdfescape.online/icon.ico?v=2" type="image/x-icon" />
-  <meta name="description" content="Share your feedback about PDF Tools Suite via WhatsApp." />
-  <link rel="canonical" href="https://pdfescape.online/feedback.html">
-  <!-- Open Graph / Twitter Meta for better sharing and SEO -->
+  
+  <!-- Meta -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Feedback • PDF Tools Suite" />
-  <meta property="og:description" content="Share your feedback about PDF Tools Suite via WhatsApp." />
+  <meta property="og:title" content="Feedback & Support • PDF Tools Suite" />
+  <meta property="og:description" content="Share your feedback directly via WhatsApp." />
   <meta property="og:url" content="https://pdfescape.online/feedback.html" />
   <meta property="og:image" content="https://pdfescape.online/icons/pdf.svg" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Feedback • PDF Tools Suite" />
-  <meta name="twitter:description" content="Share your feedback about PDF Tools Suite via WhatsApp." />
-  <meta name="twitter:image" content="https://pdfescape.online/icons/pdf.svg" />
-  <script>
-    (function(){
-      var h=location.hostname;
-      if(h.indexOf('github.io')!==-1){
-        var m=document.createElement('meta');
-        m.name='robots';
-        m.content='noindex,follow';
-        document.head.appendChild(m);
-        var p=location.pathname.replace(/^\/Pdf_Tools/,'');
-        var u='https://pdfescape.online'+p+location.search+location.hash;
-        location.replace(u);
+  
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #1565c0;
+      --surface: #ffffff;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    .feedback-page {
+      min-height: calc(100vh - 140px); /* Adjust for header/footer */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      background: radial-gradient(circle at top right, #e3f2fd 0%, transparent 40%),
+                  radial-gradient(circle at bottom left, #f3e5f5 0%, transparent 40%);
+    }
+
+    .feedback-container {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      max-width: 1000px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    /* Left Panel */
+    .feedback-info {
+      background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-info::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .feedback-info h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .feedback-info p {
+      font-size: 16px;
+      opacity: 0.9;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Right Panel */
+    .feedback-form-wrapper {
+      padding: 40px;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+    }
+
+    .form-header h2 {
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: #f8fafc;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #25D366; /* WhatsApp Green */
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2);
+    }
+
+    .device-info {
+      margin-top: 24px;
+      padding: 16px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .device-info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .device-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .detail-item span {
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .feedback-container {
+        grid-template-columns: 1fr;
       }
-    })();
-  </script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1107381099661269" crossorigin="anonymous"></script>
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .feedback-info {
+        padding: 30px;
+      }
+      .feedback-form-wrapper {
+        padding: 30px;
+      }
+    }
+  </style>
 </head>
 <body>
+
   <header class="header">
     <div class="container">
       <div class="header-content">
-        <div class="logo">
+        <a href="/" class="logo" style="text-decoration: none;">
           <i class="material-icons">picture_as_pdf</i>
           <h1>PDF Tools Suite</h1>
-        </div>
-        <nav class="top-nav-links" aria-label="Primary Navigation" style="display: flex; gap: 16px; align-items: center; margin-left: auto;">
+        </a>
+        <nav class="top-nav-links" style="margin-left: auto;">
           <a href="/" class="nav-link">Home</a>
           <a href="about.html" class="nav-link">About</a>
-          <a href="feedback.html" class="nav-link" aria-current="page">Feedback</a>
+          <a href="feedback.html" class="nav-link active">Feedback</a>
         </nav>
       </div>
     </div>
   </header>
 
-  <main class="container" style="max-width: 960px; margin: 0 auto; padding: 24px 20px;">
-    <section class="feedback-section">
-      <div class="feedback-card">
-        <div class="feedback-title-wrap">
-          <h2>
-            <span>Send Feedback on WhatsApp</span>
-            <span class="feedback-badge">Quick & Secure</span>
-          </h2>
-        </div>
-        <p>Provide your name, WhatsApp number (with country code), and your message. It will open WhatsApp chat to the site owner automatically.</p>
-
-        <form id="feedback-form" class="feedback-form" style="margin-top: 12px;">
-          <div class="feedback-grid">
-            <div class="form-field">
-              <label for="name">Your Name</label>
-              <input type="text" id="name" name="name" placeholder="e.g., Ali Khan" required />
-            </div>
-            <div class="form-field">
-              <label for="visitorNumber">Your WhatsApp Number (optional, with country code)</label>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <input type="tel" id="visitorNumber" name="visitorNumber" placeholder="e.g., 923001234567" />
-                <button type="button" id="verify-wa" class="tool-btn" style="padding:8px 12px; font-weight:600;">Verify on WhatsApp</button>
+  <main class="feedback-page">
+    <div class="feedback-container">
+      <!-- Left Panel -->
+      <div class="feedback-info">
+        <div>
+          <h1>We Value Your Feedback</h1>
+          <p>Help us improve PDF Tools Suite. Whether you found a bug, have a feature request, or just want to say hi, we're listening!</p>
+          
+          <ul class="info-list">
+            <li class="info-item">
+              <div class="info-icon">
+                <i class="material-icons">bolt</i>
               </div>
-              <small style="display:block; margin-top:6px; color: var(--text-secondary);">Note: Message will be sent from your own logged‑in WhatsApp account. The number you enter is only included in the message for reference.</small>
-            </div>
-          </div>
-          <div class="form-field">
-            <label for="message">Your Message</label>
-            <textarea id="message" name="message" rows="6" placeholder="Write your feedback here..." required></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="tool-btn">
-              <span>Send Message via WhatsApp</span>
-              <i class="material-icons">send</i>
-            </button>
-          </div>
-          <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9em;">Note: WhatsApp launch requires the app or web.whatsapp.com in your browser. No data is stored on this site.</p>
-        </form>
+              <div>
+                <strong>Fast Response</strong><br>
+                Direct WhatsApp Support
+              </div>
+            </li>
+            <li class="info-item">
+              <div class="info-icon">
+                <i class="material-icons">security</i>
+              </div>
+              <div>
+                <strong>Privacy First</strong><br>
+                No data stored on our servers
+              </div>
+            </li>
+            <li class="info-item">
+              <div class="info-icon">
+                <i class="material-icons">build</i>
+              </div>
+              <div>
+                <strong>Active Development</strong><br>
+                Regular updates based on feedback
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div style="font-size: 13px; opacity: 0.8;">
+          &copy; 2025 PDF Tools Suite
+        </div>
       </div>
 
-      
-    </section>
+      <!-- Right Panel -->
+      <div class="feedback-form-wrapper">
+        <div class="form-header">
+          <h2>Send a Message</h2>
+          <p>This will open WhatsApp with your pre-filled message.</p>
+        </div>
+
+        <form id="feedback-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="name">Your Name</label>
+              <input type="text" id="name" class="form-input" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="category">Category</label>
+              <select id="category" class="form-select">
+                <option value="General">General Inquiry</option>
+                <option value="Bug Report">Report a Bug</option>
+                <option value="Feature Request">Request Feature</option>
+                <option value="Partnership">Partnership / Ads</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="message">Message</label>
+            <textarea id="message" class="form-textarea" placeholder="Tell us more about your experience..." required></textarea>
+          </div>
+
+          <div class="device-info">
+            <div class="device-info-header">
+              <span>Auto-Detected System Info</span>
+              <i class="material-icons" style="font-size: 16px; color: #25D366;">check_circle</i>
+            </div>
+            <div class="device-details" id="device-details">
+              <!-- Populated by JS -->
+            </div>
+            <div style="margin-top: 8px; font-size: 11px; font-style: italic;">
+              This info helps us debug issues faster.
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span>Send via WhatsApp</span>
+            <i class="material-icons">send</i>
+          </button>
+        </form>
+      </div>
+    </div>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
-    <div class="footer-inner">
-      <div class="footer-brand"><strong>PDF Tools Suite</strong> <span class="footer-version">• v13</span></div>
-      <nav class="footer-nav" aria-label="Footer Navigation">
-        <a href="/" class="footer-link">Home</a>
-        <a href="about.html" class="footer-link">About</a>
-        <a href="policy.html" class="footer-link">Privacy Policy</a>
-      </nav>
-      <div class="footer-meta"><span>© 2025 • All processing is local in your browser</span></div>
-    </div>
-  </footer>
-
   <script>
-    // Optional backend verification endpoint. Set this to your deployed server URL to enable advanced WhatsApp number validation.
-    // Local development:
-    const WA_VERIFY_ENDPOINT = 'http://localhost:8080/api/verify-whatsapp';
-    // Replace this with your actual WhatsApp number in international format (no '+'). Example: 923001234567
-    const OWNER_WHATSAPP = '923081517640'; // Owner WhatsApp number in international format (no '+')
-    // Customize incoming WhatsApp message with site identity
+    // Configuration
+    const OWNER_PHONE = '923081517640'; // Your WhatsApp number
     const SITE_NAME = 'PDF Tools Suite';
-    const SITE_URL = 'https://pdfescape.online/';
 
-    document.getElementById('feedback-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const visitorNumberRaw = document.getElementById('visitorNumber').value.trim();
-      const visitorNumber = visitorNumberRaw.replace(/[^0-9]/g, ''); // keep digits only
-      const message = document.getElementById('message').value.trim();
+    // Auto-detect system info
+    function getSystemInfo() {
+      const ua = navigator.userAgent;
+      let browser = "Unknown";
+      if (ua.indexOf("Chrome") > -1) browser = "Chrome";
+      else if (ua.indexOf("Safari") > -1) browser = "Safari";
+      else if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+      else if (ua.indexOf("Edge") > -1) browser = "Edge";
 
-      if (!name || !message) {
-        alert('Please fill in your name and message. WhatsApp number is optional.');
-        return;
-      }
+      let os = "Unknown";
+      if (ua.indexOf("Win") > -1) os = "Windows";
+      else if (ua.indexOf("Mac") > -1) os = "MacOS";
+      else if (ua.indexOf("Linux") > -1) os = "Linux";
+      else if (ua.indexOf("Android") > -1) os = "Android";
+      else if (ua.indexOf("iPhone") > -1) os = "iOS";
 
-      const text = [
-        `\ud83d\udce9 ${SITE_NAME} — Website Feedback`,
-        `Source: ${SITE_URL}`,
-        `Sender: ${name}`,
-        ...(visitorNumber ? [`Visitor WhatsApp (claimed): +${visitorNumber}`] : []),
-        '',
-        'Message:',
-        message,
-        '',
-        `This feedback was sent via ${SITE_NAME} website.`,
-        'یہ فیڈبیک ہماری ویب سائٹ سے بھیجا گیا ہے۔'
-      ].join('\n');
-      const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(text)}`;
-
-      const proceed = () => {
-        window.open(url, '_blank');
+      return {
+        browser: browser,
+        os: os,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language
       };
+    }
 
-      if (WA_VERIFY_ENDPOINT && visitorNumber) {
-        try {
-          const resp = await fetch(WA_VERIFY_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ number: visitorNumber })
-          });
-          if (!resp.ok) throw new Error('Verification service error');
-          const data = await resp.json();
-          if (data.status === 'valid') {
-            proceed();
-          } else {
-            alert('This number is not on WhatsApp. Please use a valid WhatsApp number or leave the field empty.');
-          }
-        } catch (err) {
-          console.warn('Verification failed:', err);
-          alert('Verification is currently unavailable. Proceeding to WhatsApp from your logged-in account.');
-          proceed();
-        }
-      } else {
-        proceed();
-      }
-    });
+    // Populate system info on load
+    const sysInfo = getSystemInfo();
+    const detailsContainer = document.getElementById('device-details');
+    detailsContainer.innerHTML = `
+      <div class="detail-item">OS: <span>${sysInfo.os}</span></div>
+      <div class="detail-item">Browser: <span>${sysInfo.browser}</span></div>
+      <div class="detail-item">Screen: <span>${sysInfo.screen}</span></div>
+      <div class="detail-item">Lang: <span>${sysInfo.language}</span></div>
+    `;
 
-    // Optional: allow user to quickly verify if a number has WhatsApp by opening wa.me/<number>
-    document.getElementById('verify-wa').addEventListener('click', async function() {
-      const raw = document.getElementById('visitorNumber').value.trim();
-      const num = raw.replace(/[^0-9]/g, '');
-      if (!num) {
-        alert('Please enter a number to verify.');
+    // Handle Form Submit
+    document.getElementById('feedback-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const category = document.getElementById('category').value;
+      const message = document.getElementById('message').value.trim();
+      
+      if (!name || !message) {
+        alert('Please fill in all required fields.');
         return;
       }
-      if (num.length < 8 || num.length > 15) {
-        alert('Please enter a valid international number without + (8–15 digits).');
-        return;
-      }
-      // If backend verification is configured, use it; otherwise fallback to wa.me
-      if (WA_VERIFY_ENDPOINT) {
-        try {
-          const resp = await fetch(WA_VERIFY_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ number: num })
-          });
-          if (!resp.ok) throw new Error('Verification service error');
-          const data = await resp.json();
-          if (data.status === 'valid') {
-            alert('This number is on WhatsApp ✅');
-          } else {
-            alert('This number is not on WhatsApp ❌');
-          }
-        } catch (err) {
-          console.warn('Verification failed:', err);
-          alert('Verification service unavailable, opening WhatsApp check page...');
-          const checkUrl = `https://wa.me/${num}`;
-          window.open(checkUrl, '_blank');
-        }
-      } else {
-        const checkUrl = `https://wa.me/${num}`;
-        window.open(checkUrl, '_blank');
-      }
+
+      // Format WhatsApp Message
+      const text = `
+*New Feedback for ${SITE_NAME}* 📝
+
+👤 *Name:* ${name}
+📂 *Category:* ${category}
+
+💬 *Message:*
+${message}
+
+------------------
+⚙️ *System Info:*
+• OS: ${sysInfo.os}
+• Browser: ${sysInfo.browser}
+• Screen: ${sysInfo.screen}
+• Lang: ${sysInfo.language}
+• Date: ${new Date().toLocaleString()}
+------------------
+`.trim();
+
+      // Encode and open
+      const whatsappUrl = `https://wa.me/${OWNER_PHONE}?text=${encodeURIComponent(text)}`;
+      window.open(whatsappUrl, '_blank');
     });
   </script>
+
 </body>
 </html>
-
