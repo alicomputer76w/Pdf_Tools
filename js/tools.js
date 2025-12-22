@@ -80,6 +80,11 @@ class PDFMergerTool extends BaseTool {
             // Download the merged PDF
             DownloadUtils.downloadPDF(pdfBytes, filename);
 
+            // Add to history
+            if (window.HistoryManager) {
+                HistoryManager.add('Merged PDFs', filename);
+            }
+
             return {
                 success: true,
                 message: `Successfully merged ${files.length} PDFs into ${filename}`
@@ -211,6 +216,11 @@ class PDFSplitterTool extends BaseTool {
             const pdfBytes = await PDFUtils.savePDF(newPdf);
             const filename = (options.filename || 'extracted-pages.pdf').trim();
             DownloadUtils.downloadPDF(pdfBytes, filename);
+
+            // Add to history
+            if (window.HistoryManager) {
+                HistoryManager.add('Split PDF', filename);
+            }
 
             return {
                 success: true,
@@ -457,6 +467,12 @@ class ImageToPDFTool extends BaseTool {
         const pdfBytes = await doc.save();
         const filename = (options.filename || 'images-to-pdf.pdf').trim();
         DownloadUtils.downloadPDF(pdfBytes, filename);
+        
+        // Add to history
+        if (window.HistoryManager) {
+            HistoryManager.add('Image to PDF', filename);
+        }
+
         const msg = skipped.length ? `Created ${filename} (skipped ${skipped.length} image(s): ${skipped.join(', ')})` : `Created ${filename}`;
         return { success: true, message: msg };
     }

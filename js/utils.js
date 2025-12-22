@@ -18,6 +18,41 @@ const SUPPORTED_TYPES = {
 };
 
 /**
+ * History Management Utilities
+ */
+class HistoryManager {
+    static add(action, filename) {
+        try {
+            const history = JSON.parse(localStorage.getItem('pdf_tools_history') || '[]');
+            const newItem = {
+                action,
+                filename,
+                date: new Date().toISOString(),
+                id: Date.now().toString()
+            };
+            // Add to beginning
+            history.unshift(newItem);
+            // Keep last 5
+            if (history.length > 5) history.pop();
+            localStorage.setItem('pdf_tools_history', JSON.stringify(history));
+            
+            // Dispatch event for UI updates
+            window.dispatchEvent(new CustomEvent('historyUpdated'));
+        } catch (e) {
+            console.error('Failed to save history', e);
+        }
+    }
+
+    static get() {
+        try {
+            return JSON.parse(localStorage.getItem('pdf_tools_history') || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+}
+
+/**
  * File Validation Utilities
  */
 class FileValidator {

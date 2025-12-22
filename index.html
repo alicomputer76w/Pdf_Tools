@@ -406,6 +406,88 @@
                     </button>
                 </div>
             </section>
+
+            <!-- Recent Activity Section -->
+            <section class="recent-activity-section" style="margin-top: 60px; display: none; padding: 30px; background: #fff; border-radius: 16px; border: 1px solid #e9eef5; box-shadow: 0 4px 20px rgba(0,0,0,0.04);" id="recent-activity-section">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 24px; color: #0d1b2a; display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i class="material-icons" style="color: #1976d2;">history</i>
+                        Recent Activity
+                    </h2>
+                    <button class="btn btn-text" id="clear-history-btn" style="color: #64748b; font-size: 14px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px;">
+                        <i class="material-icons" style="font-size: 16px;">delete_outline</i>
+                        Clear History
+                    </button>
+                </div>
+                <div class="recent-files-grid" id="recent-files-grid" style="display: grid; gap: 12px;">
+                    <!-- Recent files will be populated here by JS -->
+                </div>
+            </section>
+
+            <!-- Detailed Content Section for SEO & AdSense -->
+            <section class="content-section" style="margin-top: 60px; padding: 40px; background: #fff; border-radius: 16px; border: 1px solid #e9eef5; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                <div style="max-width: 900px; margin: 0 auto;">
+                    <h2 style="font-size: 28px; color: #0d1b2a; margin-bottom: 24px;">Why Use PDF Tools Suite?</h2>
+                    <p style="font-size: 16px; color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
+                        PDF Tools Suite offers a comprehensive collection of free online PDF utilities designed to make your document management workflow seamless and efficient. Unlike traditional server-based tools, our platform processes your files <strong>100% directly in your browser</strong>. This means your sensitive documents never leave your device, ensuring maximum privacy and security.
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px;">
+                        <div>
+                            <h3 style="font-size: 20px; color: #1976d2; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="material-icons" style="font-size: 24px;">security</i>
+                                Privacy First
+                            </h3>
+                            <p style="color: #4b5563; line-height: 1.5;">
+                                Your files are processed locally using advanced WebAssembly and JavaScript technologies. We do not store, view, or upload your documents to any server. Whether it's bank statements, legal contracts, or personal photos, your data remains yours alone.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 20px; color: #1976d2; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="material-icons" style="font-size: 24px;">speed</i>
+                                Lightning Fast
+                            </h3>
+                            <p style="color: #4b5563; line-height: 1.5;">
+                                By eliminating the need for file uploads and downloads, our tools work instantly. Large files that would typically take minutes to upload are processed in seconds. This is especially beneficial for users with slower internet connections or limited data plans.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 20px; color: #1976d2; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="material-icons" style="font-size: 24px;">all_inclusive</i>
+                                All-in-One Solution
+                            </h3>
+                            <p style="color: #4b5563; line-height: 1.5;">
+                                From basic tasks like merging and splitting to advanced operations like OCR (Optical Character Recognition) and metadata editing, we provide over 20 specialized tools. Whether you're a student, professional, or casual user, you'll find exactly what you need.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 20px; color: #1976d2; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="material-icons" style="font-size: 24px;">devices</i>
+                                Cross-Platform
+                            </h3>
+                            <p style="color: #4b5563; line-height: 1.5;">
+                                Our responsive design ensures a smooth experience on all devices—desktops, tablets, and smartphones. Convert images to PDF on your mobile or merge reports on your laptop with the same ease and functionality.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h2 style="font-size: 28px; color: #0d1b2a; margin: 40px 0 24px;">Popular Use Cases</h2>
+                    <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                        <li style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #1976d2;">
+                            <strong>Students:</strong> Combine assignment pages into a single PDF, compress files for portal uploads, or extract text from scanned notes using OCR.
+                        </li>
+                        <li style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #1976d2;">
+                            <strong>Business:</strong> Securely sign contracts digitally, merge monthly reports, and add professional watermarks to sensitive documents.
+                        </li>
+                        <li style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #1976d2;">
+                            <strong>Designers:</strong> Convert PDF portfolios to high-quality images or extract images from client documents without quality loss.
+                        </li>
+                        <li style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #1976d2;">
+                            <strong>Everyday Use:</strong> Rotate scanned IDs, fill out application forms, or protect personal documents with passwords.
+                        </li>
+                    </ul>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -481,6 +563,8 @@
             <nav class="footer-nav" aria-label="Footer Navigation">
                 <a href="about.html" target="_blank" rel="noopener" class="footer-link">About</a>
                 <a href="policy.html" target="_blank" rel="noopener" class="footer-link">Privacy Policy</a>
+                <a href="terms.html" target="_blank" rel="noopener" class="footer-link">Terms of Service</a>
+                <a href="contact.html" target="_blank" rel="noopener" class="footer-link">Contact Us</a>
                 <a href="debug-console.html" target="_blank" rel="noopener" class="footer-link">Debug</a>
             </nav>
             <div class="footer-meta">

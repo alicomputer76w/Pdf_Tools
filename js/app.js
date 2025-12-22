@@ -36,6 +36,9 @@ class PDFToolsApp {
             // Initialize analytics (if enabled)
             this.initializeAnalytics();
             
+            // Initialize history
+            this.renderHistory();
+            
             // Hide loading screen
             this.hideLoadingScreen();
             
@@ -181,6 +184,23 @@ class PDFToolsApp {
                 this.openFeedback();
             });
         }
+
+        // Handle history update
+        window.addEventListener('historyUpdated', () => {
+            this.renderHistory();
+        });
+        
+        // Handle clear history
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear your recent activity history?')) {
+                    localStorage.removeItem('pdf_tools_history');
+                    this.renderHistory();
+                    this.components.notification.success('History cleared');
+                }
+            });
+        }
     }
 
     setupKeyboardShortcuts() {
@@ -239,6 +259,43 @@ class PDFToolsApp {
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent
         });
+    }
+
+    renderHistory() {
+        const historySection = document.getElementById('recent-activity-section');
+        const historyGrid = document.getElementById('recent-files-grid');
+        
+        if (!historySection || !historyGrid) return;
+
+        let history = [];
+        try {
+            history = window.HistoryManager ? HistoryManager.get() : [];
+        } catch (e) {
+            console.warn('HistoryManager not available');
+        }
+
+        if (history.length === 0) {
+            historySection.style.display = 'none';
+            return;
+        }
+
+        historySection.style.display = 'block';
+        historyGrid.innerHTML = history.map(item => `
+            <div class="history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #1976d2;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #e3f2fd; padding: 8px; border-radius: 50%; color: #1976d2;">
+                        <i class="material-icons" style="font-size: 20px;">description</i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 500; color: #0d1b2a;">${item.action}</div>
+                        <div style="font-size: 12px; color: #64748b;">${item.filename}</div>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #94a3b8;">
+                    ${new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+            </div>
+        `).join('');
     }
 
     handleResize() {
