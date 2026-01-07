@@ -605,7 +605,101 @@
             console.log('✅ ToolManager loaded successfully');
         }
     </script>
+    <!-- SEO: FAQ Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Are my files uploaded to any server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. All tools run in your browser using client-side processing. Your files never leave your device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What file types are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PDF up to 50MB, and images including JPG, PNG, GIF, BMP, and TIFF."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the service free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, PDF Tools Suite is free. Some advanced features may be added in the future."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use the tools offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. After the page loads, many tools continue to work even if you go offline."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I contact support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use the Feedback page to send a WhatsApp message or visit the Contact page for email support."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you keep user history?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Optional local history is stored in your browser only. You can clear it anytime from the Recent Activity section."
+          }
+        }
+      ]
+    }
+    </script>
     <script src="js/app.js?v=4"></script>
+    
+    <!-- SEO & UX: On-page FAQ -->
+    <section class="container" style="margin-top:40px;">
+        <div style="background:#fff; border:1px solid #e9eef5; border-radius:16px; box-shadow:0 8px 24px rgba(13,17,23,.06); padding:24px;">
+            <h2 style="margin:0 0 12px; font-size:22px; color:#0d1b2a; display:flex; align-items:center; gap:8px;">
+                <i class="material-icons" style="color:#1976d2;">help_outline</i>
+                Frequently Asked Questions
+            </h2>
+            <p style="color:#4b5563; margin:0 0 16px;">Quick answers about privacy, supported files, and usage.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Are my files uploaded?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">No. All processing is client-side. Your files stay on your device.</p>
+                </div>
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Supported file types?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">PDF up to 50MB, images (JPG, PNG, GIF, BMP, TIFF).</p>
+                </div>
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Is it free?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">Yes, core tools are free and available to everyone.</p>
+                </div>
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Offline usage?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">Many tools work offline after loading the page.</p>
+                </div>
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Contact support?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">Use <a href="feedback.html" style="color:#1976d2;">Feedback</a> for WhatsApp or visit <a href="contact.html" style="color:#1976d2;">Contact</a>.</p>
+                </div>
+                <div style="border:1px solid #e9eef5; border-radius:12px; padding:16px;">
+                    <strong style="color:#0d1b2a;">Clear history?</strong>
+                    <p style="color:#4b5563; margin-top:8px;">From Recent Activity, click Clear History to remove local entries.</p>
+                </div>
+            </div>
+        </div>
+    </section>
     <footer style="margin-top:40px; padding:16px; text-align:center; color:#555; font-size:14px;">
         Developed by Sadaqat Ali
     </footer>
