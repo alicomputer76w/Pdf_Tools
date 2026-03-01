@@ -53,11 +53,19 @@ class PDFToWordTool extends BaseTool {
     }
 
     async ensureDocxLoaded() {
-        const isReady = () => !!(window.docx && (window.docx.Document || window.docx.default?.Document));
-        if (isReady()) {
-            if (window.docx.default) window.docx = { ...window.docx, ...window.docx.default };
-            return true;
-        }
+        const isReady = () => {
+            if (!window.docx) return false;
+            // Some versions export directly, some under .default
+            if (window.docx.Document) return true;
+            if (window.docx.default && window.docx.default.Document) {
+                // Merge default into parent to normalize
+                Object.assign(window.docx, window.docx.default);
+                return true;
+            }
+            return false;
+        };
+        
+        if (isReady()) return true;
 
         const sources = [
             'https://unpkg.com/docx@8.5.0/build/index.js',
@@ -76,10 +84,7 @@ class PDFToWordTool extends BaseTool {
                     script.onerror = () => reject(new Error('Failed to load ' + src));
                     document.head.appendChild(script);
                 });
-                if (isReady()) {
-                    if (window.docx.default) window.docx = { ...window.docx, ...window.docx.default };
-                    return true;
-                }
+                if (isReady()) return true;
             } catch (e) {
                 console.warn('DOCX library load failed from:', src, e);
             }
@@ -90,8 +95,13 @@ class PDFToWordTool extends BaseTool {
 
     async execute(files, options = {}) {
         if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
-        // Ensure docx library is available; try to load if missing
+        
+        // Ensure docx library is available
         const ok = await this.ensureDocxLoaded();
+        if (!ok) {
+            throw new Error('Word export library could not be loaded. Please check your internet connection.');
+        }
+
         const detectMode = (options.detect || 'auto');
         const mode = (options.mode || 'editable');
         const userFont = (options.font || 'auto');
@@ -101,61 +111,13 @@ class PDFToWordTool extends BaseTool {
         const data = await file.arrayBuffer();
         const pdf = await window.pdfjsLib.getDocument({ data }).promise;
 
-        // DOCX is not loaded properly, use RTF fallback
-        if (!ok || !window.docx || !window.docx.Document) {
-            const toRTF = (str) => {
-                let out = '';
-                for (let i = 0; i < str.length; i++) {
-                    const ch = str[i];
-                    const code = str.charCodeAt(i);
-                    if (ch === '\\' || ch === '{' || ch === '}') {
-                        out += '\\' + ch; // escape special chars
-                    } else if (code <= 127) {
-                        out += ch;
-                    } else {
-                        // UTF-16 code unit to signed 16-bit for \uN?
-                        const signed = code > 32767 ? code - 65536 : code;
-                        out += `\\u${signed}?`;
-                    }
-                }
-                return out;
-            };
-
-            let rtf = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Calibri;}}\\fs24 ';
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                const strings = content.items.map(item => item.str);
-                const text = strings.join(' ');
-                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(text));
-
-                rtf += `\\pard\\qc ${toRTF(`— Page ${i} —`)}\\par`;
-                if (rtl) {
-                    rtf += `\\pard\\rtlpar\\qr ${toRTF(text)}\\par`;
-                } else {
-                    rtf += `\\pard\\ltrpar\\ql ${toRTF(text)}\\par`;
-                }
-                rtf += `\\par`;
-            }
-            rtf += '}';
-
-            const filenameRTF = `${file.name.replace(/\.pdf$/i, '')}_word.rtf`;
-            DownloadUtils.downloadText(rtf, filenameRTF);
-            return { success: true, message: `Exported ${pdf.numPages} page(s) to Word-compatible RTF (DOCX library unavailable)` };
-        }
-        
         const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
         const doc = new Document({
             sections: [{
                 properties: {
                     page: {
-                        margin: {
-                            top: 720,
-                            right: 720,
-                            bottom: 720,
-                            left: 720,
-                        },
+                        margin: { top: 720, right: 720, bottom: 720, left: 720 },
                     },
                 },
                 children: []
@@ -166,17 +128,13 @@ class PDFToWordTool extends BaseTool {
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 1.0 });
-            const pageTwipsW = 11900; // Standard A4 width in twips (approx)
-            const pageTwipsH = 16840; // Standard A4 height in twips (approx)
-
-            if (mode === 'exact') {
-                // ... (keep exact mode)
-                continue;
-            }
+            const pageTwipsW = 11900; 
 
             // Text extraction with position data
             const textContent = await page.getTextContent({ normalizeWhitespace: true });
-            const items = textContent.items.map(item => {
+            
+            // Map items with normalized coordinates
+            let items = textContent.items.map(item => {
                 const tx = window.pdfjsLib.Util.transform(viewport.transform, item.transform);
                 return {
                     str: item.str,
@@ -184,18 +142,12 @@ class PDFToWordTool extends BaseTool {
                     y: tx[5],
                     width: item.width,
                     height: item.height,
-                    fontName: item.fontName,
                     rtl: isUrdu(item.str)
                 };
             });
 
-            // Sort items by Y (top to bottom) then X (left to right)
-            items.sort((a, b) => {
-                if (Math.abs(a.y - b.y) > 5) return b.y - a.y; // Descending Y
-                return a.x - b.x; // Ascending X
-            });
-
-            // Group items into lines based on Y coordinate
+            // Group items into lines based on Y coordinate with tolerance
+            items.sort((a, b) => b.y - a.y); // Top to bottom
             let lines = [];
             if (items.length > 0) {
                 let currentLine = [items[0]];
@@ -212,45 +164,38 @@ class PDFToWordTool extends BaseTool {
                 lines.push(currentLine);
             }
 
-            // Process each line
             for (const line of lines) {
+                // Detect line direction
                 const lineText = line.map(item => item.str).join('');
-                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(lineText));
+                const isLineRtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(lineText));
                 
-                // Sort line items based on direction
-                line.sort((a, b) => rtl ? b.x - a.x : a.x - b.x);
+                // Sort line items: English (Left to Right), Urdu (Right to Left)
+                line.sort((a, b) => isLineRtl ? b.x - a.x : a.x - b.x);
 
                 const textRuns = line.map(item => {
-                    const fontName = rtl ? (userFont === 'auto' ? 'Jameel Noori Nastaleeq' : userFont) : 'Calibri';
+                    const fontName = isLineRtl ? (userFont === 'auto' ? 'Jameel Noori Nastaleeq' : userFont) : 'Calibri';
                     return new TextRun({
                         text: item.str,
                         font: fontName,
-                        rightToLeft: rtl,
-                        size: Math.round(item.height * 1.5) || 22, // Approximate font size
+                        rightToLeft: isLineRtl,
+                        size: Math.round(item.height * 1.5) || 22,
                     });
                 });
 
-                const firstItem = line[0];
-                const indentTwips = Math.max(0, Math.round((firstItem.x / viewport.width) * pageTwipsW));
+                const firstItem = isLineRtl ? line[0] : line[0];
+                const indentTwips = Math.max(0, Math.round((line[0].x / viewport.width) * pageTwipsW));
 
                 children.push(new Paragraph({
                     children: textRuns,
-                    alignment: rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                    bidirectional: rtl,
-                    indent: rtl ? { right: indentTwips } : { left: indentTwips },
-                    spacing: {
-                        before: 120,
-                        after: 120,
-                        line: 240,
-                    }
+                    alignment: isLineRtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
+                    bidirectional: isLineRtl,
+                    indent: isLineRtl ? { right: indentTwips } : { left: indentTwips },
+                    spacing: { before: 120, after: 120, line: 240 }
                 }));
             }
 
-            // Page break
             if (i < pdf.numPages) {
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: "", break: 1 })]
-                }));
+                children.push(new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }));
             }
         }
 
