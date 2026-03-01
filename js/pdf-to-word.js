@@ -54,11 +54,8 @@ class PDFToWordTool extends BaseTool {
 
     async ensureDocxLoaded() {
         const isReady = () => {
-            if (!window.docx) return false;
-            // Some versions export directly, some under .default
-            if (window.docx.Document) return true;
-            if (window.docx.default && window.docx.default.Document) {
-                // Merge default into parent to normalize
+            if (window.docx && window.docx.Document) return true;
+            if (window.docx && window.docx.default && window.docx.default.Document) {
                 Object.assign(window.docx, window.docx.default);
                 return true;
             }
@@ -70,8 +67,7 @@ class PDFToWordTool extends BaseTool {
         const sources = [
             'https://unpkg.com/docx@8.5.0/build/index.js',
             'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js',
-            'js/vendor/docx.js'
+            'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js'
         ];
 
         for (const src of sources) {
@@ -83,6 +79,7 @@ class PDFToWordTool extends BaseTool {
                     script.onload = () => resolve(true);
                     script.onerror = () => reject(new Error('Failed to load ' + src));
                     document.head.appendChild(script);
+                    setTimeout(() => reject(new Error('Timeout loading ' + src)), 8000);
                 });
                 if (isReady()) return true;
             } catch (e) {
@@ -96,12 +93,6 @@ class PDFToWordTool extends BaseTool {
     async execute(files, options = {}) {
         if (!files || files.length !== 1) throw new Error('Select exactly one PDF file');
         
-        // Ensure docx library is available
-        const ok = await this.ensureDocxLoaded();
-        if (!ok) {
-            throw new Error('Word export library could not be loaded. Please check your internet connection.');
-        }
-
         const detectMode = (options.detect || 'auto');
         const mode = (options.mode || 'editable');
         const userFont = (options.font || 'auto');
@@ -110,6 +101,45 @@ class PDFToWordTool extends BaseTool {
         const file = files[0];
         const data = await file.arrayBuffer();
         const pdf = await window.pdfjsLib.getDocument({ data }).promise;
+
+        // Try to load DOCX library
+        const ok = await this.ensureDocxLoaded();
+
+        if (!ok) {
+            // Fallback to RTF if library fails to load
+            console.warn('DOCX library not loaded, falling back to RTF');
+            const toRTF = (str) => {
+                let out = '';
+                for (let i = 0; i < str.length; i++) {
+                    const ch = str[i];
+                    const code = str.charCodeAt(i);
+                    if (ch === '\\' || ch === '{' || ch === '}') out += '\\' + ch;
+                    else if (code <= 127) out += ch;
+                    else {
+                        const signed = code > 32767 ? code - 65536 : code;
+                        out += `\\u${signed}?`;
+                    }
+                }
+                return out;
+            };
+
+            let rtf = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Calibri;}}\\fs24 ';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const text = content.items.map(item => item.str).join(' ');
+                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(text));
+
+                rtf += `\\pard\\qc ${toRTF(`— Page ${i} —`)}\\par`;
+                rtf += rtl ? `\\pard\\rtlpar\\qr ${toRTF(text)}\\par` : `\\pard\\ltrpar\\ql ${toRTF(text)}\\par`;
+                rtf += `\\par`;
+            }
+            rtf += '}';
+
+            const filenameRTF = `${file.name.replace(/\.pdf$/i, '')}_word.rtf`;
+            DownloadUtils.downloadText(rtf, filenameRTF);
+            return { success: true, message: `Exported to RTF (DOCX library unavailable). Opening in Word will work.` };
+        }
 
         const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
