@@ -53,14 +53,16 @@ class PDFToWordTool extends BaseTool {
     }
 
     async ensureDocxLoaded() {
-        const isReady = () => !!(window.docx && window.docx.Document && window.docx.Packer);
-        if (isReady()) return true;
+        const isReady = () => !!(window.docx && (window.docx.Document || window.docx.default?.Document));
+        if (isReady()) {
+            if (window.docx.default) window.docx = { ...window.docx, ...window.docx.default };
+            return true;
+        }
 
         const sources = [
+            'https://unpkg.com/docx@8.5.0/build/index.js',
+            'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js',
             'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js',
-            'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/docx.min.js',
-            'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js',
-            'https://unpkg.com/docx@8.5.0/build/docx.js',
             'js/vendor/docx.js'
         ];
 
@@ -74,7 +76,10 @@ class PDFToWordTool extends BaseTool {
                     script.onerror = () => reject(new Error('Failed to load ' + src));
                     document.head.appendChild(script);
                 });
-                if (isReady()) return true;
+                if (isReady()) {
+                    if (window.docx.default) window.docx = { ...window.docx, ...window.docx.default };
+                    return true;
+                }
             } catch (e) {
                 console.warn('DOCX library load failed from:', src, e);
             }
@@ -96,9 +101,49 @@ class PDFToWordTool extends BaseTool {
         const data = await file.arrayBuffer();
         const pdf = await window.pdfjsLib.getDocument({ data }).promise;
 
-        if (!ok || !window.docx) {
-            // ... (keep fallback)
+        // DOCX is not loaded properly, use RTF fallback
+        if (!ok || !window.docx || !window.docx.Document) {
+            const toRTF = (str) => {
+                let out = '';
+                for (let i = 0; i < str.length; i++) {
+                    const ch = str[i];
+                    const code = str.charCodeAt(i);
+                    if (ch === '\\' || ch === '{' || ch === '}') {
+                        out += '\\' + ch; // escape special chars
+                    } else if (code <= 127) {
+                        out += ch;
+                    } else {
+                        // UTF-16 code unit to signed 16-bit for \uN?
+                        const signed = code > 32767 ? code - 65536 : code;
+                        out += `\\u${signed}?`;
+                    }
+                }
+                return out;
+            };
+
+            let rtf = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Calibri;}}\\fs24 ';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const strings = content.items.map(item => item.str);
+                const text = strings.join(' ');
+                const rtl = detectMode === 'rtl' ? true : (detectMode === 'ltr' ? false : isUrdu(text));
+
+                rtf += `\\pard\\qc ${toRTF(`— Page ${i} —`)}\\par`;
+                if (rtl) {
+                    rtf += `\\pard\\rtlpar\\qr ${toRTF(text)}\\par`;
+                } else {
+                    rtf += `\\pard\\ltrpar\\ql ${toRTF(text)}\\par`;
+                }
+                rtf += `\\par`;
+            }
+            rtf += '}';
+
+            const filenameRTF = `${file.name.replace(/\.pdf$/i, '')}_word.rtf`;
+            DownloadUtils.downloadText(rtf, filenameRTF);
+            return { success: true, message: `Exported ${pdf.numPages} page(s) to Word-compatible RTF (DOCX library unavailable)` };
         }
+        
         const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
         const doc = new Document({
