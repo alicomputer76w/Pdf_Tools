@@ -5,7 +5,7 @@
     <loc>https://pdfescape.online/</loc>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
 
   <!-- Blog & Articles (High Value Content) -->
@@ -13,25 +13,31 @@
     <loc>https://pdfescape.online/blog.html</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
+  </url>
+  <url>
+    <loc>https://pdfescape.online/articles/digital-signatures-guide.html</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/articles/why-client-side-secure.html</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/articles/how-to-merge-mobile.html</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/articles/image-to-pdf-students.html</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
 
   <!-- Essential Pages (AdSense Requirements) -->
@@ -39,25 +45,25 @@
     <loc>https://pdfescape.online/about.html</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/contact.html</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/terms.html</loc>
     <priority>0.6</priority>
     <changefreq>yearly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/policy.html</loc>
     <priority>0.6</priority>
     <changefreq>yearly</changefreq>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
 
   <!-- Support Pages -->
@@ -65,12 +71,12 @@
     <loc>https://pdfescape.online/guide.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-12</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
   <url>
     <loc>https://pdfescape.online/help.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
-    <lastmod>2025-12-12</lastmod>
+    <lastmod>2026-03-08</lastmod>
   </url>
 </urlset>
